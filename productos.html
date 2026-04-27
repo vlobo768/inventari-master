@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Productos - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    .search-box {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: #00d2ff;
+    }
+    .btn-add {
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 13px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .stock-warning {
+      color: #e74c3c;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover { background: #3498db; border-color: #3498db; }
+    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
+    .btn-kardex:hover { background: #f1c40f; border-color: #f1c40f; color: #000; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 30px;
+      border-radius: 20px;
+      width: 600px;
+      max-width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    .modal-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .modal-form .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-form .form-group.full {
+      grid-column: span 2;
+    }
+    .modal-form label {
+      font-size: 12px;
+      color: #cbd5e0;
+      margin-bottom: 5px;
+    }
+    .modal-form input, .modal-form select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      outline: none;
+    }
+    .modal-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-save {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Kardex Table */
+    .kardex-container {
+      margin-top: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Gestión de Productos</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='categorias.html'">Categorías</button>
+        <button class="btn-nav" onclick="window.location.href='users.html'">Usuarios</button>
+        <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchProduct" placeholder="Buscar por nombre, SKU o código de barras..." oninput="loadProducts()">
+        <select id="filterCategory" onchange="loadProducts()" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); outline: none;">
+          <option value="">Todas las Categorías</option>
+        </select>
+      </div>
+      <button class="btn-add" onclick="openProductModal()">+ Nuevo Producto</button>
+    </div>
+
+    <div class="table-container">
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio Venta</th>
+            <th>Stock</th>
+            <th>Mínimo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Producto -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nuevo Producto</h2>
+        <span class="close-modal" onclick="closeProductModal()">&times;</span>
+      </div>
+      <form id="productForm" class="modal-form">
+        <input type="hidden" id="productId">
+        <div class="form-group full">
+          <label>Nombre del Producto</label>
+          <input type="text" id="prodName" required>
+        </div>
+        <div class="form-group">
+          <label>SKU (Referencia)</label>
+          <input type="text" id="prodSku">
+        </div>
+        <div class="form-group">
+          <label>Código de Barras</label>
+          <input type="text" id="prodBarcode">
+        </div>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="prodCategory" required>
+            <!-- Cargado dinámicamente -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Precio Compra</label>
+          <input type="number" step="0.01" id="prodBuyPrice" required>
+        </div>
+        <div class="form-group">
+          <label>Precio Venta</label>
+          <input type="number" step="0.01" id="prodSalePrice" required>
+        </div>
+        <div class="form-group">
+          <label>Stock Inicial</label>
+          <input type="number" id="prodQuantity" value="0">
+        </div>
+        <div class="form-group">
+          <label>Stock Mínimo (Alerta)</label>
+          <input type="number" id="prodMinStock" value="5">
+        </div>
+        <div class="form-group full">
+          <label>ID de Imagen (Media ID)</label>
+          <input type="number" id="prodMediaId">
+        </div>
+        <div class="modal-footer full">
+          <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Kardex -->
+  <div id="kardexModal" class="modal">
+    <div class="modal-content" style="width: 800px;">
+      <div class="modal-header">
+        <h2>Historial de Movimientos (Kardex)</h2>
+        <span class="close-modal" onclick="closeKardexModal()">&times;</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Referencia</th>
+              <th>Usuario</th>
+            </tr>
+          </thead>
+          <tbody id="kardexTbody">
+            <!-- Movimientos -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadCategories() {
+      const response = await window.api.apiCall('categories', 'getAllCategories');
+      if (response.success) {
+        const cats = response.data;
+        const filterCat = document.getElementById('filterCategory');
+        const prodCat = document.getElementById('prodCategory');
+        
+        cats.forEach(c => {
+          const opt1 = new Option(c.name, c.id);
+          filterCat.add(opt1);
+          const opt2 = new Option(c.name, c.id);
+          prodCat.add(opt2);
+        });
+      }
+    }
+
+    async function loadProducts() {
+      const search = document.getElementById('searchProduct').value;
+      const category = document.getElementById('filterCategory').value;
+
+      const response = await window.api.apiCall('products', 'getAllProducts', { search, category });
+      
+      if (response.success) {
+        const products = response.data;
+        const tbody = document.querySelector('#productsTable tbody');
+        tbody.innerHTML = '';
+
+        products.forEach(p => {
+          const isLowStock = p.quantity <= p.min_stock;
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${p.sku || '---'}</td>
+            <td>\${p.name}</td>
+            <td>\${p.category_name || 'Sin categoría'}</td>
+            <td>$\${p.sale_price}</td>
+            <td>
+              <span class="\${isLowStock ? 'stock-warning' : ''}">
+                \${p.quantity} \${isLowStock ? '⚠️' : ''}
+              </span>
+            </td>
+            <td>\${p.min_stock}</td>
+            <td class="actions">
+              <button class="btn-action btn-kardex" onclick="openKardex(\${p.id})">Kardex</button>
+              <button class="btn-action btn-edit" onclick="editProduct(\${p.id})">Editar</button>
+              <button class="btn-action btn-delete" onclick="deleteProduct(\${p.id})">Eliminar</button>
+            </td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    function openProductModal(prodId = null) {
+      const modal = document.getElementById('productModal');
+      const form = document.getElementById('productForm');
+      const title = document.getElementById('modalTitle');
+      
+      form.reset();
+      document.getElementById('productId').value = '';
+
+      if (prodId) {
+        title.innerText = 'Editar Producto';
+        loadProductData(prodId);
+      } else {
+        title.innerText = 'Nuevo Producto';
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    async function loadProductData(id) {
+      const response = await window.api.apiCall('products', 'getProductById', id);
+      if (response.success && response.data) {
+        const p = response.data;
+        document.getElementById('productId').value = p.id;
+        document.getElementById('prodName').value = p.name;
+        document.getElementById('prodSku').value = p.sku || '';
+        document.getElementById('prodBarcode').value = p.barcode || '';
+        document.getElementById('prodCategory').value = p.categorie_id;
+        document.getElementById('prodBuyPrice').value = p.buy_price;
+        document.getElementById('prodSalePrice').value = p.sale_price;
+        document.getElementById('prodQuantity').value = p.quantity;
+        document.getElementById('prodMinStock').value = p.min_stock;
+        document.getElementById('prodMediaId').value = p.media_id;
+      }
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').style.display = 'none';
+    }
+
+    document.getElementById('productForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('productId').value;
+      const data = {
+        name: document.getElementById('prodName').value,
+        sku: document.getElementById('prodSku').value,
+        barcode: document.getElementById('prodBarcode').value,
+        category: document.getElementById('prodCategory').value,
+        buyPrice: parseFloat(document.getElementById('prodBuyPrice').value),
+        salePrice: parseFloat(document.getElementById('prodSalePrice').value),
+        quantity: parseInt(document.getElementById('prodQuantity').value),
+        minStock: parseInt(document.getElementById('prodMinStock').value),
+        mediaId: document.getElementById('prodMediaId').value
+      };
+
+      const method = id ? 'updateProduct' : 'addProduct';
+      const payload = id ? { id: parseInt(id), ...data } : data;
+
+      const response = await window.api.apiCall('products', method, payload);
+      if (response.success) {
+        alert(id ? "Producto actualizado" : "Producto creado");
+        closeProductModal();
+        loadProducts();
+      } else {
+        alert("Error: " + response.msg);
+      }
+    };
+
+    async function deleteProduct(id) {
+      if (confirm("¿Estás seguro de eliminar este producto?")) {
+        const response = await window.api.apiCall('products', 'deleteProduct', id);
+        if (response.success) {
+          loadProducts();
+        } else {
+          alert("Error al eliminar");
+        }
+      }
+    }
+
+    async function openKardex(productId) {
+      const response = await window.api.apiCall('products', 'getProductKardex', productId);
+      if (response.success) {
+        const movements = response.data;
+        const tbody = document.getElementById('kardexTbody');
+        tbody.innerHTML = '';
+
+        movements.forEach(m => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${m.date}</td>
+            <td>\${m.type}</td>
+            <td>\${m.qty}</td>
+            <td>\${m.reference}</td>
+            <td>\${m.user_name || 'Sistema'}</td>
+          \`;
+          tbody.appendChild(row);
+        });
+        document.getElementById('kardexModal').style.display = 'flex';
+      }
+    }
+
+    function closeKardexModal() {
+      document.getElementById('kardexModal').style.display = 'none';
+    }
+
+    window.onload = async () => {
+      await loadCategories();
+      await loadProducts();
+    };
+  </script>
+</body>
+</html>
+
+(End of file - total 454 lines)
+</content>

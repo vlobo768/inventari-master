@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body base — sin overflow ni height fijo para que cada página lo defina */
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background-attachment: fixed;
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+/* ====== LOGIN PAGE ====== */
+.login-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-page {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.text-center {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.text-center h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #00d2ff;
+}
+
+.text-center p {
+  font-size: 14px;
+  color: #a0aec0;
+}
+
+/* ====== FORMULARIOS ====== */
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 13px;
+  color: #cbd5e0;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.form-group input:focus {
+  border-color: #00d2ff;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}
+
+/* ====== BOTONES ====== */
+.btn {
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  margin-top: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 5px 10px rgba(0, 210, 255, 0.3);
+}
+
+/* ====== MENSAJES ====== */
+#msg {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 20px;
+}
+
+/* ====== ANIMACIONES ====== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

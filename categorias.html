@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Categorías - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn-add {
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover { background: #3498db; border-color: #3498db; }
+    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 30px;
+      border-radius: 20px;
+      width: 400px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-size: 12px;
+      color: #cbd5e0;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      outline: none;
+    }
+    .modal-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-save {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Gestión de Categorías</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
+        <button class="btn-nav" onclick="window.location.href='users.html'">Usuarios</button>
+        <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn-add" onclick="openCategoryModal()">+ Nueva Categoría</button>
+    </div>
+
+    <div class="table-container">
+      <table id="catTable">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Categoría Padre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Categoría -->
+  <div id="catModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nueva Categoría</h2>
+        <span class="close-modal" onclick="closeCategoryModal()">&times;</span>
+      </div>
+      <form id="catForm" class="modal-form">
+        <input type="hidden" id="catId">
+        <div class="form-group">
+          <label>Nombre de la Categoría</label>
+          <input type="text" id="catName" required>
+        </div>
+        <div class="form-group">
+          <label>Categoría Padre (Opcional)</label>
+          <select id="catParent">
+            <option value="">Ninguna (Categoría Raíz)</option>
+            <!-- Cargado dinámicamente -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" onclick="closeCategoryModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar Categoría</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    async function loadCategories() {
+      const response = await window.api.apiCall('categories', 'getAllCategories');
+      if (response.success) {
+        const cats = response.data;
+        const tbody = document.querySelector('#catTable tbody');
+        tbody.innerHTML = '';
+
+        cats.forEach(c => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${c.name}</td>
+            <td>\${c.parent_name || '<span style="color: #a0aec0">Raíz</span>'}</td>
+            <td class="actions">
+              <button class="btn-action btn-edit" onclick="editCategory(\${c.id})">Editar</button>
+              <button class="btn-action btn-delete" onclick="deleteCategory(\${c.id})">Eliminar</button>
+            </td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    async function updateParentSelect() {
+      const response = await window.api.apiCall('categories', 'getAllCategories');
+      if (response.success) {
+        const cats = response.data;
+        const select = document.getElementById('catParent');
+        select.innerHTML = '<option value="">Ninguna (Categoría Raíz)</option>';
+        
+        cats.forEach(c => {
+          const opt = new Option(c.name, c.id);
+          select.add(opt);
+        });
+      }
+    }
+
+    function openCategoryModal(catId = null) {
+      const modal = document.getElementById('catModal');
+      const form = document.getElementById('catForm');
+      const title = document.getElementById('modalTitle');
+      
+      form.reset();
+      document.getElementById('catId').value = '';
+
+      if (catId) {
+        title.innerText = 'Editar Categoría';
+        loadCategoryData(catId);
+      } else {
+        title.innerText = 'Nueva Categoría';
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    async function loadCategoryData(id) {
+      const response = await window.api.apiCall('categories', 'getCategoryById', id);
+      if (response.success && response.data) {
+        const cat = response.data;
+        document.getElementById('catId').value = cat.id;
+        document.getElementById('catName').value = cat.name;
+        document.getElementById('catParent').value = cat.parent_id || '';
+      }
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('catModal').style.display = 'none';
+    }
+
+    document.getElementById('catForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('catId').value;
+      const data = {
+        name: document.getElementById('catName').value,
+        parent_id: document.getElementById('catParent').value || null
+      };
+
+      const method = id ? 'updateCategory' : 'addCategory';
+      const payload = id ? { id: parseInt(id), ...data } : data;
+
+      const response = await window.api.apiCall('categories', method, payload);
+      if (response.success) {
+        alert(id ? "Categoría actualizada" : "Categoría creada");
+        closeCategoryModal();
+        loadCategories();
+      } else {
+        alert("Error: " + response.msg);
+      }
+    };
+
+    async function deleteCategory(id) {
+      if (confirm("¿Estás seguro de eliminar esta categoría? Si tiene productos asociados, la operación fallará.")) {
+        const response = await window.api.apiCall('categories', 'deleteCategory', id);
+        if (response.success) {
+          loadCategories();
+        } else {
+          alert("Error: " + response.msg);
+        }
+      }
+    }
+
+    // ✅ FIX: función editCategory faltante
+    function editCategory(id) {
+      openCategoryModal(id);
+    }
+
+    window.onload = async () => {
+      await updateParentSelect();
+      await loadCategories();
+    };
+  </script>
+</body>
+</html>
+
+(End of file - total 315 lines)
+</content>

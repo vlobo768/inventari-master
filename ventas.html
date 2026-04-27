@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>POS - Punto de Venta Professional</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+    .pos-container {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      width: 100%;
+      gap: 0;
+    }
+    /* Sección Izquierda: Catálogo y Búsqueda */
+    .pos-main {
+      padding: 30px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255,255,255,0.02);
+    }
+    .pos-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .pos-header h1 { color: #00d2ff; font-size: 24px; }
+    .pos-nav { display: flex; gap: 10px; }
+
+    .search-section {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .search-bar {
+      flex: 1;
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 18px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .search-bar:focus { border-color: #00d2ff; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255,255,255,0.1);
+      border-color: #00d2ff;
+    }
+    .product-card .no-stock {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .product-card h3 { font-size: 14px; margin-bottom: 5px; }
+    .product-card .price { color: #00d2ff; font-weight: bold; font-size: 16px; }
+    .product-card .stock-info { font-size: 11px; color: #a0aec0; margin-top: 5px; }
+    .stock-low { color: #e74c3c !important; }
+
+    /* Sección Derecha: Carrito */
+    .pos-sidebar {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .cart-title {
+      font-size: 20px;
+      color: #fff;
+      margin-bottom: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+    }
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.05);
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .cart-item-info h4 { font-size: 13px; margin: 0; }
+    .cart-item-info p { font-size: 11px; color: #a0aec0; margin: 0; }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .qty-btn:hover { background: #00d2ff; color: #000; }
+
+    .checkout-section {
+      border-top: 2px solid rgba(255,255,255,0.1);
+      padding-top: 20px;
+    }
+    .checkout-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #00d2ff;
+    }
+    .checkout-form { display: flex; flex-direction: column; gap: 10px; }
+    .checkout-form select, .checkout-form input {
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      outline: none;
+    }
+    .btn-pay {
+      background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    .btn-pay:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-nav:hover { background: #00d2ff; color: #000; }
+    .empty-cart {
+      text-align: center;
+      color: #a0aec0;
+      margin-top: 50px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pos-container">
+    <div class="pos-main">
+      <div class="pos-header">
+        <h1>🛒 Punto de Venta</h1>
+        <div class="pos-nav">
+          <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+          <button class="btn-nav" onclick="window.location.href='sales_history.html'">Historial</button>
+        </div>
+      </div>
+
+      <div class="search-section">
+        <input type="text" id="productSearch" class="search-bar"
+               placeholder="Buscar producto por nombre, SKU o código de barras..."
+               oninput="searchProducts()">
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <div class="empty-cart">Cargando productos...</div>
+      </div>
+    </div>
+
+    <div class="pos-sidebar">
+      <div class="cart-title">🧾 Carrito de Ventas</div>
+
+      <div class="cart-items" id="cartItems">
+        <div class="empty-cart">El carrito está vacío</div>
+      </div>
+
+      <div class="checkout-section">
+        <div class="checkout-form">
+          <label style="font-size: 12px; color: #a0aec0;">Cliente</label>
+          <select id="customerSelect">
+            <option value="">Cliente General</option>
+          </select>
+
+          <label style="font-size: 12px; color: #a0aec0;">Método de Pago</label>
+          <select id="paymentMethod">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Crédito">Crédito</option>
+          </select>
+        </div>
+
+        <div class="checkout-row" style="margin-top: 20px;">
+          <span>Subtotal:</span>
+          <span id="subtotal">$0.00</span>
+        </div>
+        <div class="total-row">
+          <span>Total:</span>
+          <span id="totalAmount">$0.00</span>
+        </div>
+
+        <button class="btn-pay" id="btnPay" onclick="processSale()">✔ Completar Venta</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cart = [];
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
+
+    // ✅ FIX: Cargar TODOS los productos al iniciar el POS
+    async function loadAllProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '<div class="empty-cart">Cargando productos...</div>';
+      const response = await window.api.apiCall('products', 'getAllProducts', {});
+      if (response.success) {
+        renderProducts(response.data);
+      } else {
+        grid.innerHTML = '<div class="empty-cart">Error al cargar productos.</div>';
+      }
+    }
+
+    // ✅ FIX: Búsqueda sin mínimo de caracteres
+    async function searchProducts() {
+      const query = document.getElementById('productSearch').value;
+      const response = await window.api.apiCall('products', 'getAllProducts', { search: query });
+      if (response.success) {
+        renderProducts(response.data);
+      }
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+
+      if (!products || products.length === 0) {
+        grid.innerHTML = '<div class="empty-cart">No se encontraron productos.</div>';
+        return;
+      }
+
+      products.forEach(p => {
+        const card = document.createElement('div');
+        const hasStock = p.quantity > 0;
+        card.className = 'product-card' + (hasStock ? '' : ' no-stock');
+        if (hasStock) card.onclick = () => addToCart(p);
+        const stockClass = p.quantity <= p.min_stock ? 'stock-low' : '';
+        card.innerHTML = `
+          <h3>${p.name}</h3>
+          <div class="price">$${parseFloat(p.sale_price).toFixed(2)}</div>
+          <div class="stock-info ${stockClass}">
+            ${hasStock ? `Stock: ${p.quantity}` : '⚠ Sin stock'}
+          </div>
+          ${p.sku ? `<div class="stock-info">SKU: ${p.sku}</div>` : ''}
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function addToCart(product) {
+      const existing = cart.find(item => item.id === product.id);
+      if (existing) {
+        if (existing.quantity < product.quantity) {
+          existing.quantity++;
+          existing.total = existing.quantity * existing.price;
+        } else {
+          alert("No hay más stock disponible para este producto.");
+          return;
+        }
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: parseFloat(product.sale_price),
+          quantity: 1,
+          total: parseFloat(product.sale_price)
+        });
+      }
+      renderCart();
+    }
+
+    function updateQty(id, delta) {
+      const idx = cart.findIndex(i => i.id === id);
+      if (idx === -1) return;
+      cart[idx].quantity += delta;
+      if (cart[idx].quantity <= 0) {
+        cart.splice(idx, 1);
+      } else {
+        cart[idx].total = cart[idx].quantity * cart[idx].price;
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItems');
+      container.innerHTML = '';
+      let total = 0;
+
+      if (cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart">El carrito está vacío</div>';
+        document.getElementById('subtotal').innerText = '$0.00';
+        document.getElementById('totalAmount').innerText = '$0.00';
+        return;
+      }
+
+      cart.forEach(item => {
+        total += item.total;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <div class="cart-item-info">
+            <h4>${item.name}</h4>
+            <p>$${item.price.toFixed(2)} × ${item.quantity}</p>
+          </div>
+          <div class="cart-item-controls">
+            <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
+            <span>${item.quantity}</span>
+            <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+            <span style="font-weight: bold; min-width: 60px; text-align: right;">$${item.total.toFixed(2)}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
+      document.getElementById('totalAmount').innerText = `$${total.toFixed(2)}`;
+    }
+
+    async function loadCustomers() {
+      const response = await window.api.apiCall('customers', 'getAllCustomers');
+      if (response && response.success) {
+        const select = document.getElementById('customerSelect');
+        response.data.forEach(c => {
+          const opt = new Option(c.name, c.id);
+          select.add(opt);
+        });
+      }
+    }
+
+    async function processSale() {
+      if (cart.length === 0) {
+        alert("El carrito está vacío. Agregue productos antes de procesar la venta.");
+        return;
+      }
+
+      const btn = document.getElementById('btnPay');
+      btn.disabled = true;
+      btn.innerText = 'Procesando...';
+
+      const totalText = document.getElementById('totalAmount').innerText.replace('$', '').replace(',', '');
+      const saleData = {
+        customerId: document.getElementById('customerSelect').value || null,
+        userId: currentUser ? currentUser.id : null,
+        paymentMethod: document.getElementById('paymentMethod').value,
+        items: cart,
+        total: parseFloat(totalText)
+      };
+
+      try {
+        const response = await window.api.apiCall('sales', 'addSale', saleData);
+        if (response.success) {
+          alert(`✅ Venta #${response.saleId} completada con éxito.\nTotal: $${saleData.total.toFixed(2)}`);
+          cart = [];
+          renderCart();
+          await loadAllProducts(); // Recargar stock actualizado
+        } else {
+          alert("Error al procesar venta: " + response.msg);
+        }
+      } catch (err) {
+        alert("Error inesperado: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '✔ Completar Venta';
+      }
+    }
+
+    window.onload = async () => {
+      await loadCustomers();
+      await loadAllProducts(); // ✅ Carga inmediata del catálogo
+    };
+  </script>
+</body>
+</html>

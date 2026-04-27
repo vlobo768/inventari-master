@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Control de Caja - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .cash-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+    .cash-card {
+      background: rgba(255,255,255,0.05);
+      padding: 25px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+    .cash-card h2 {
+      color: #cbd5e0;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    .balance-display {
+      font-size: 36px;
+      font-weight: bold;
+      color: #00d2ff;
+      margin-bottom: 20px;
+    }
+    .cash-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .cash-form input {
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+    }
+    .btn-cash {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-open {
+      background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+      color: #fff;
+    }
+    .btn-close {
+      background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+      color: #fff;
+    }
+    .btn-cash:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .history-container {
+      background: rgba(255,255,255,0.02);
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Control de Caja y Arqueo</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
+      </div>
+    </div>
+
+    <div class="cash-panel">
+      <!-- Apertura -->
+      <div class="cash-card" id="panel-open">
+        <h2>Apertura de Caja</h2>
+        <div class="cash-form">
+          <label style="color: #a0aec0; font-size: 14px;">Saldo Inicial</label>
+          <input type="number" id="startBalance" value="0.00" step="0.01">
+          <button class="btn-cash btn-open" onclick="openCash()">Abrir Sesión</button>
+        </div>
+      </div>
+
+      <!-- Cierre -->
+      <div class="cash-card" id="panel-close" style="display: none;">
+        <h2>Cierre de Caja</h2>
+        <div class="balance-display" id="currentBalance">$0.00</div>
+        <div class="cash-form">
+          <label style="color: #a0aec0; font-size: 14px;">Saldo Final Real</label>
+          <input type="number" id="endBalance" value="0.00" step="0.01">
+          <button class="btn-cash btn-close" onclick="closeCash()">Cerrar Sesión</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-container">
+      <h2 style="color: #00d2ff; margin-bottom: 20px; font-size: 20px;">Historial de Sesiones</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Apertura</th>
+            <th>Cierre</th>
+            <th>Saldo Inicio</th>
+            <th>Saldo Final</th>
+            <th>Diferencia</th>
+          </tr>
+        </thead>
+        <tbody id="historyTbody">
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    async function checkSession() {
+      const response = await window.api.apiCall('cash', 'getActiveSession');
+      if (response.success && response.data) {
+        // Hay una sesión abierta
+        document.getElementById('panel-open').style.display = 'none';
+        document.getElementById('panel-close').style.display = 'block';
+        document.getElementById('currentBalance').innerText = `$${response.data.start_balance || 0}`;
+      } else {
+        // No hay sesión abierta
+        document.getElementById('panel-open').style.display = 'block';
+        document.getElementById('panel-close').style.display = 'none';
+      }
+    }
+
+    async function openCash() {
+      const balance = parseFloat(document.getElementById('startBalance').value);
+      const userId = currentUser ? currentUser.id : null;
+      
+      const response = await window.api.apiCall('cash', 'openSession', userId, balance);
+      if (response.success) {
+        alert("Caja abierta exitosamente");
+        checkSession();
+        loadHistory();
+      } else {
+        alert("Error al abrir caja: " + response.error);
+      }
+    }
+
+    async function closeCash() {
+      const balance = parseFloat(document.getElementById('endBalance').value);
+      const session = await window.api.apiCall('cash', 'getActiveSession');
+      
+      if (!session.success || !session.data) return alert("No hay sesión activa");
+      
+      const response = await window.api.apiCall('cash', 'closeSession', session.data.id, balance);
+      if (response.success) {
+        alert("Caja cerrada exitosamente");
+        checkSession();
+        loadHistory();
+      } else {
+        alert("Error al cerrar caja: " + response.error);
+      }
+    }
+
+    async function loadHistory() {
+      const response = await window.api.apiCall('cash', 'getSessionHistory');
+      if (response.success) {
+        const history = response.data;
+        const tbody = document.getElementById('historyTbody');
+        tbody.innerHTML = '';
+
+        history.forEach(s => {
+          const diff = (s.end_balance || 0) - (s.start_balance || 0);
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${s.username}</td>
+            <td>\${s.start_date}</td>
+            <td>\${s.end_date || '---'}</td>
+            <td>$\${s.start_balance}</td>
+            <td>$\${s.end_balance || 0}</td>
+            <td style="color: \${diff >= 0 ? '#2ecc71' : '#e74c3c'}">$\${diff.toFixed(2)}</td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    window.onload = async () => {
+      await checkSession();
+      await loadHistory();
+    };
+  </script>
+</body>
+</html>
+
+(End of file - total 225 lines)
+</content>

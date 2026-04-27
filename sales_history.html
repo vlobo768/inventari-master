@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial de Ventas - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    .search-box {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: #00d2ff;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-detail:hover { background: #3498db; border-color: #3498db; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 30px;
+      border-radius: 20px;
+      width: 700px;
+      max-width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    .detail-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .detail-item span {
+      color: #a0aec0;
+      font-size: 13px;
+      display: block;
+    }
+    .detail-item strong {
+      color: #fff;
+      font-size: 15px;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Historial de Ventas</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='ventas.html'">Nuevo POS</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchSale" placeholder="Buscar por ID de venta o cliente..." oninput="loadSales()">
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="salesTable">
+        <thead>
+          <tr>
+            <th>ID Venta</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Vendedor</th>
+            <th>Total</th>
+            <th>Método</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Detalle Venta -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Detalle de la Venta</h2>
+        <span class="close-modal" onclick="closeDetailModal()">&times;</span>
+      </div>
+      <div id="saleHeaderDetails" class="detail-info">
+        <!-- Cabecera -->
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cant.</th>
+              <th>Precio Unit.</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="saleItemsTbody">
+            <!-- Items -->
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align: right; margin-top: 20px; font-size: 20px; font-weight: bold; color: #00d2ff;">
+        Total: <span id="saleTotal">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadSales() {
+      const search = document.getElementById('searchSale').value;
+      const response = await window.api.apiCall('sales', 'getAllSales', { search });
+      
+      if (response.success) {
+        const sales = response.data;
+        const tbody = document.querySelector('#salesTable tbody');
+        tbody.innerHTML = '';
+
+        sales.forEach(s => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>#\${s.id}</td>
+            <td>\${s.customer_name || 'Cliente General'}</td>
+            <td>\${s.date}</td>
+            <td>\${s.seller_name || 'Sist.'}</td>
+            <td>$\${s.total}</td>
+            <td>\${s.payment_method}</td>
+            <td class="actions">
+              <button class="btn-action btn-detail" onclick="viewSaleDetails(\${s.id})">Ver Detalle</button>
+            </td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    async function viewSaleDetails(id) {
+      const response = await window.api.apiCall('sales', 'getSaleDetails', id);
+      if (response.success) {
+        const { header, items } = response.data;
+        
+        // ✅ FIX: Mostrar nombre del cliente/vendedor, no el ID crudo
+        const headerDiv = document.getElementById('saleHeaderDetails');
+        headerDiv.innerHTML = `
+          <div class="detail-item"><span>Venta #:</span><strong>${header.id}</strong></div>
+          <div class="detail-item"><span>Fecha:</span><strong>${new Date(header.date).toLocaleString()}</strong></div>
+          <div class="detail-item"><span>Cliente:</span><strong>${header.customer_name || 'Cliente General'}</strong></div>
+          <div class="detail-item"><span>Vendedor:</span><strong>${header.seller_name || 'Sistema'}</strong></div>
+          <div class="detail-item"><span>Método de Pago:</span><strong>${header.payment_method || 'N/A'}</strong></div>
+          <div class="detail-item"><span>Estado:</span><strong style="color: ${header.status === 'cancelled' ? '#e74c3c' : '#2ecc71'}">${header.status === 'cancelled' ? '❌ Anulada' : '✅ Completada'}</strong></div>
+        `;
+
+        // Llenar items
+        const tbody = document.getElementById('saleItemsTbody');
+        tbody.innerHTML = '';
+        items.forEach(i => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${i.product_name}</td>
+            <td>\${i.qty}</td>
+            <td>$\${i.unit_price}</td>
+            <td>$\${i.total}</td>
+          \`;
+          tbody.appendChild(row);
+        });
+
+        document.getElementById('saleTotal').innerText = \`$\${header.total}\`;
+        document.getElementById('detailModal').style.display = 'flex';
+      }
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+
+    window.onload = loadSales;
+  </script>
+</body>
+</html>
+
+(End of file - total 221 lines)
+</content>

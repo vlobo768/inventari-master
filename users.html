@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    .search-box {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: #00d2ff;
+    }
+    .btn-add {
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+    .status-inactive { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+    
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover { background: #3498db; border-color: #3498db; }
+    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
+    .btn-status:hover { background: #f1c40f; border-color: #f1c40f; color: #000; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 30px;
+      border-radius: 20px;
+      width: 500px;
+      max-width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    .modal-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .modal-form .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-form .form-group.full {
+      grid-column: span 2;
+    }
+    .modal-form label {
+      font-size: 12px;
+      color: #cbd5e0;
+      margin-bottom: 5px;
+    }
+    .modal-form input, .modal-form select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      outline: none;
+    }
+    .modal-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-save {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Gestión de Usuarios</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
+        <button class="btn-nav" onclick="window.location.href='categorias.html'">Categorías</button>
+        <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchUser" placeholder="Buscar por nombre, usuario o correo..." oninput="loadUsers()">
+        <select id="filterRole" onchange="loadUsers()" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); outline: none;">
+          <option value="">Todos los Roles</option>
+        </select>
+        <select id="filterStatus" onchange="loadUsers()" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); outline: none;">
+          <option value="">Todos los Estados</option>
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+      <button class="btn-add" onclick="openUserModal()">+ Nuevo Usuario</button>
+    </div>
+
+    <div class="table-container">
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Usuario -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nuevo Usuario</h2>
+        <span class="close-modal" onclick="closeUserModal()">&times;</span>
+      </div>
+      <form id="userForm" class="modal-form">
+        <input type="hidden" id="userId">
+        <div class="form-group full">
+          <label>Nombre Completo</label>
+          <input type="text" id="userName" required>
+        </div>
+        <div class="form-group">
+          <label>Nombre de Usuario</label>
+          <input type="text" id="userUsername" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="userPassword">
+        </div>
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="userEmail">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" id="userPhone">
+        </div>
+        <div class="form-group">
+          <label>Rol / Nivel</label>
+          <select id="userRole" required>
+            <!-- Cargado dinámicamente -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="userStatus">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+          </select>
+        </div>
+        <div class="modal-footer full">
+          <button type="button" class="btn-cancel" onclick="closeUserModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // RBAC check
+    const userStr = localStorage.getItem("currentUser");
+    if (!userStr) {
+      window.location.href = "index.html";
+    } else {
+      const user = JSON.parse(userStr);
+      if (user.user_level != 1 && user.user_level != 2) {
+        alert("No tienes permisos para acceder a esta sección.");
+        window.location.href = "dashboard.html";
+      }
+    }
+
+    async function loadRoles() {
+      const response = await window.api.apiCall('users', 'findAllGroups');
+      if (response.success) {
+        const roles = response.data;
+        const roleSelect = document.getElementById('userRole');
+        const filterRole = document.getElementById('filterRole');
+        
+        roles.forEach(role => {
+          const opt = new Option(role.group_name, role.group_level);
+          roleSelect.add(opt);
+          
+          const filterOpt = new Option(role.group_name, role.group_level);
+          filterRole.add(filterOpt);
+        });
+      }
+    }
+
+    async function loadUsers() {
+      const search = document.getElementById('searchUser').value;
+      const role = document.getElementById('filterRole').value;
+      const status = document.getElementById('filterStatus').value;
+
+      const response = await window.api.apiCall('users', 'getAllUsers', { search, role, status });
+      
+      if (response.success) {
+        const users = response.data;
+        const tbody = document.querySelector('#usersTable tbody');
+        tbody.innerHTML = '';
+
+        users.forEach(u => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${u.name}</td>
+            <td>\${u.username}</td>
+            <td>\${u.email || 'N/A'}</td>
+            <td>\${u.phone || 'N/A'}</td>
+            <td>\${u.role}</td>
+            <td>
+              <span class="status-badge \${u.status == 1 ? 'status-active' : 'status-inactive'}">
+                \${u.status == 1 ? 'Activo' : 'Inactivo'}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn-action btn-edit" onclick="editUser(\${u.id})">Editar</button>
+              <button class="btn-action btn-status" onclick="toggleStatus(\${u.id}, \${u.status})">Estado</button>
+              <button class="btn-action btn-delete" onclick="deleteUser(\${u.id})">Eliminar</button>
+            </td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    function openUserModal(userId = null) {
+      const modal = document.getElementById('userModal');
+      const form = document.getElementById('userForm');
+      const title = document.getElementById('modalTitle');
+      
+      form.reset();
+      document.getElementById('userId').value = '';
+      document.getElementById('userPassword').required = true;
+
+      if (userId) {
+        title.innerText = 'Editar Usuario';
+        document.getElementById('userPassword').required = false;
+        loadUserData(userId);
+      } else {
+        title.innerText = 'Nuevo Usuario';
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    async function loadUserData(id) {
+      const response = await window.api.apiCall('users', 'getUserProfile', id);
+      if (response) {
+        const u = response;
+        document.getElementById('userId').value = u.id;
+        document.getElementById('userName').value = u.name;
+        document.getElementById('userUsername').value = u.username;
+        document.getElementById('userEmail').value = u.email || '';
+        document.getElementById('userPhone').value = u.phone || '';
+        document.getElementById('userRole').value = u.user_level;
+        document.getElementById('userStatus').value = u.status;
+      }
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').style.display = 'none';
+    }
+
+    document.getElementById('userForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('userId').value;
+      const data = {
+        name: document.getElementById('userName').value,
+        username: document.getElementById('userUsername').value,
+        password: document.getElementById('userPassword').value,
+        email: document.getElementById('userEmail').value,
+        phone: document.getElementById('userPhone').value,
+        level: document.getElementById('userRole').value,
+        status: document.getElementById('userStatus').value
+      };
+
+      const method = id ? 'updateUser' : 'addUser';
+      const payload = id ? { id, ...data } : data;
+
+      const response = await window.api.apiCall('users', method, payload);
+      if (response.success) {
+        alert(id ? "Usuario actualizado" : "Usuario creado");
+        closeUserModal();
+        loadUsers();
+      } else {
+        alert("Error: " + response.msg);
+      }
+    };
+
+    async function deleteUser(id) {
+      if (confirm("¿Estás seguro de eliminar este usuario?")) {
+        const response = await window.api.apiCall('users', 'deleteUser', id);
+        if (response.success) {
+          loadUsers();
+        } else {
+          alert("Error al eliminar");
+        }
+      }
+    }
+
+    async function toggleStatus(id, currentStatus) {
+      const newStatus = currentStatus == 1 ? 0 : 1;
+      const response = await window.api.apiCall('users', 'toggleUserStatus', id, newStatus);
+      if (response.success) {
+        loadUsers();
+      } else {
+        alert("Error al cambiar estado");
+      }
+    }
+
+    // ✅ FIX: función editUser faltante
+    function editUser(id) {
+      openUserModal(id);
+    }
+
+    window.onload = async () => {
+      await loadRoles();
+      await loadUsers();
+    };
+  </script>
+</body>
+</html>
+
+(End of file - total 384 lines)
+</content>

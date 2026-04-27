@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Proveedores - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    .search-box {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: #00d2ff;
+    }
+    .btn-add {
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover { background: #3498db; border-color: #3498db; }
+    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 30px;
+      border-radius: 20px;
+      width: 500px;
+      max-width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    .modal-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .modal-form .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-form .form-group.full {
+      grid-column: span 2;
+    }
+    .modal-form label {
+      font-size: 12px;
+      color: #cbd5e0;
+      margin-bottom: 5px;
+    }
+    .modal-form input, .modal-form select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      outline: none;
+    }
+    .modal-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-save {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Gestión de Proveedores</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
+        <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchSupplier" placeholder="Buscar por nombre o contacto..." oninput="loadSuppliers()">
+      </div>
+      <button class="btn-add" onclick="openSupplierModal()">+ Nuevo Proveedor</button>
+    </div>
+
+    <div class="table-container">
+      <table id="suppliersTable">
+        <thead>
+          <tr>
+            <th>Nombre Empresa</th>
+            <th>Contacto</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Proveedor -->
+  <div id="supplierModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nuevo Proveedor</h2>
+        <span class="close-modal" onclick="closeSupplierModal()">&times;</span>
+      </div>
+      <form id="supplierForm" class="modal-form">
+        <input type="hidden" id="supplierId">
+        <div class="form-group full">
+          <label>Nombre de la Empresa</label>
+          <input type="text" id="suppName" required>
+        </div>
+        <div class="form-group">
+          <label>Persona de Contacto</label>
+          <input type="text" id="suppContact">
+        </div>
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="suppEmail">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" id="suppPhone">
+        </div>
+        <div class="form-group full">
+          <label>Dirección</label>
+          <input type="text" id="suppAddress">
+        </div>
+        <div class="modal-footer full">
+          <button type="button" class="btn-cancel" onclick="closeSupplierModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar Proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    async function loadSuppliers() {
+      const search = document.getElementById('searchSupplier').value;
+      const response = await window.api.apiCall('suppliers', 'getAllSuppliers', { search });
+      
+      if (response.success) {
+        const suppliers = response.data;
+        const tbody = document.querySelector('#suppliersTable tbody');
+        tbody.innerHTML = '';
+
+        suppliers.forEach(s => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>\${s.name}</td>
+            <td>\${s.contact_name || 'N/A'}</td>
+            <td>\${s.email || 'N/A'}</td>
+            <td>\${s.phone || 'N/A'}</td>
+            <td class="actions">
+              <button class="btn-action btn-edit" onclick="editSupplier(\${s.id})">Editar</button>
+              <button class="btn-action btn-delete" onclick="deleteSupplier(\${s.id})">Eliminar</button>
+            </td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    function openSupplierModal(suppId = null) {
+      const modal = document.getElementById('supplierModal');
+      const form = document.getElementById('supplierForm');
+      const title = document.getElementById('modalTitle');
+      
+      form.reset();
+      document.getElementById('supplierId').value = '';
+
+      if (suppId) {
+        title.innerText = 'Editar Proveedor';
+        loadSupplierData(suppId);
+      } else {
+        title.innerText = 'Nuevo Proveedor';
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    async function loadSupplierData(id) {
+      const response = await window.api.apiCall('suppliers', 'getAllSuppliers');
+      if (response.success) {
+        const s = response.data.find(item => item.id == id);
+        if (s) {
+          document.getElementById('supplierId').value = s.id;
+          document.getElementById('suppName').value = s.name;
+          document.getElementById('suppContact').value = s.contact_name || '';
+          document.getElementById('suppEmail').value = s.email || '';
+          document.getElementById('suppPhone').value = s.phone || '';
+          document.getElementById('suppAddress').value = s.address || '';
+        }
+      }
+    }
+
+    function closeSupplierModal() {
+      document.getElementById('supplierModal').style.display = 'none';
+    }
+
+    document.getElementById('supplierForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('supplierId').value;
+      const data = {
+        name: document.getElementById('suppName').value,
+        contact_name: document.getElementById('suppContact').value,
+        email: document.getElementById('suppEmail').value,
+        phone: document.getElementById('suppPhone').value,
+        address: document.getElementById('suppAddress').value
+      };
+
+      const method = id ? 'updateSupplier' : 'addSupplier';
+      const payload = id ? { id: parseInt(id), ...data } : data;
+
+      const response = await window.api.apiCall('suppliers', method, payload);
+      if (response.success) {
+        alert(id ? "Proveedor actualizado" : "Proveedor creado");
+        closeSupplierModal();
+        loadSuppliers();
+      } else {
+        alert("Error: " + response.msg);
+      }
+    };
+
+    async function deleteSupplier(id) {
+      if (confirm("¿Estás seguro de eliminar este proveedor?")) {
+        const response = await window.api.apiCall('suppliers', 'deleteSupplier', id);
+        if (response.success) {
+          loadSuppliers();
+        } else {
+          alert("Error al eliminar");
+        }
+      }
+    }
+
+    // ✅ FIX: función editSupplier faltante
+    function editSupplier(id) {
+      openSupplierModal(id);
+    }
+
+    window.onload = loadSuppliers;
+  </script>
+</body>
+</html>
+
+(End of file - total 308 lines)
+</content>

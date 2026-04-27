@@ -1,0 +1,30 @@
+{
+  "name": "inventario-app",
+  "version": "1.0.0",
+  "description": "Sistema de inventario de escritorio",
+  "main": "main.js",
+  "author": "TuNombre",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.inventario.app",
+    "productName": "Inventario App",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "mysql2": "^3.22.2"
+  }
+}

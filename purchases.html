@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Compras - Inventario</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 40px;
+      overflow-y: auto;
+      height: auto;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+    }
+    .header h1 {
+      color: #00d2ff;
+      font-size: 24px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    .btn-nav {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #00d2ff;
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    .search-box {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: #00d2ff;
+    }
+    .btn-add {
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #00d2ff;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-action {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-detail:hover { background: #3498db; border-color: #3498db; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 30px;
+      border-radius: 20px;
+      width: 800px;
+      max-width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    .purchase-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-size: 12px;
+      color: #cbd5e0;
+      margin-bottom: 5px;
+    }
+    .form-group select, .form-group input {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      outline: none;
+    }
+    .items-section {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .items-table {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    .items-table th {
+      font-size: 12px;
+      padding: 8px;
+    }
+    .items-table td {
+      padding: 5px;
+    }
+    .item-input {
+      width: 100%;
+      padding: 5px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      border-radius: 4px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn-save {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Gestión de Compras (Entradas)</h1>
+      <div class="nav-buttons">
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchPurchase" placeholder="Buscar por proveedor o ID..." oninput="loadPurchases()">
+      </div>
+      <button class="btn-add" onclick="openPurchaseModal()">+ Nueva Compra</button>
+    </div>
+
+    <div class="table-container">
+      <table id="purchasesTable">
+        <thead>
+          <tr>
+            <th>ID Compra</th>
+            <th>Proveedor</th>
+            <th>Fecha</th>
+            <th>Vendedor</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cargado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Detalle Compra -->
+  <div id="purchaseDetailModal" class="modal">
+    <div class="modal-content" style="width: 800px; max-height: 85vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>Detalle de Compra</h2>
+        <span class="close-modal" onclick="closePurchaseDetailModal()">&#x2715;</span>
+      </div>
+      <div id="purchaseDetailHeader" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <!-- Cabecera -->
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unit.</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="purchaseDetailItems">
+            <!-- Items -->
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align: right; margin-top: 20px; font-size: 20px; font-weight: bold; color: #00d2ff;">
+        Total: <span id="purchaseDetailTotal">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Compra -->
+  <div id="purchaseModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nueva Orden de Compra</h2>
+        <span class="close-modal" onclick="closePurchaseModal()">&times;</span>
+      </div>
+      <form id="purchaseForm" class="purchase-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Proveedor</label>
+            <select id="purchaseSupplier" required>
+              <option value="">Seleccione Proveedor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="purchaseDate" required>
+          </div>
+        </div>
+
+        <div class="items-section">
+          <h3>Productos Recibidos</h3>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Costo</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="purchaseItemsTbody">
+              <!-- Items dinámicos -->
+            </tbody>
+          </table>
+          <button type="button" class="btn-nav" style="width: 100%;" onclick="addItemRow()">+ Agregar Producto</button>
+        </div>
+
+        <div class="modal-footer">
+          <div style="flex: 1; text-align: left; font-size: 20px; font-weight: bold; color: #00d2ff;">
+            Total: <span id="purchaseTotal">$0.00</span>
+          </div>
+          <button type="button" class="btn-cancel" onclick="closePurchaseModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Registrar Compra</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let purchaseItems = [];
+
+    async function loadPurchases() {
+      const search = document.getElementById('searchPurchase').value;
+      const response = await window.api.apiCall('purchases', 'getAllPurchases', { search });
+      
+      if (response.success) {
+        const purchases = response.data;
+        const tbody = document.querySelector('#purchasesTable tbody');
+        tbody.innerHTML = '';
+
+        purchases.forEach(p => {
+          const row = document.createElement('tr');
+          row.innerHTML = \`
+            <td>#\${p.id}</td>
+            <td>\${p.supplier_name}</td>
+            <td>\${p.date}</td>
+            <td>\${p.user_name}</td>
+            <td>$\${p.total}</td>
+            <td class="actions">
+              <button class="btn-action btn-detail" onclick="viewPurchaseDetails(\${p.id})">Detalle</button>
+            </td>
+          \`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    async function loadSuppliers() {
+      const response = await window.api.apiCall('suppliers', 'getAllSuppliers');
+      if (response.success) {
+        const suppliers = response.data;
+        const select = document.getElementById('purchaseSupplier');
+        suppliers.forEach(s => {
+          const opt = new Option(s.name, s.id);
+          select.add(opt);
+        });
+      }
+    }
+
+    async function loadProducts() {
+      const response = await window.api.apiCall('products', 'getAllProducts');
+      if (response.success) {
+        return response.data;
+      }
+      return [];
+    }
+
+    function addItemRow() {
+      const products = window.cachedProducts || [];
+      const tbody = document.getElementById('purchaseItemsTbody');
+      const rowId = Date.now();
+      
+      const row = document.createElement('tr');
+      row.id = \`row-\${rowId}\`;
+      
+      let productOptions = products.map(p => \`<option value="\${p.id}">\${p.name} (Stock: \${p.quantity})</option>\`).join('');
+      
+      row.innerHTML = \`
+        <td>
+          <select class="item-prod" onchange="updateRowTotal(\${rowId})" required>
+            <option value="">Seleccionar...</option>
+            \${productOptions}
+          </select>
+        </td>
+        <td><input type="number" class="item-qty" value="1" min="1" oninput="updateRowTotal(\${rowId})" required></td>
+        <td><input type="number" class="item-price" step="0.01" value="0.00" oninput="updateRowTotal(\${rowId})" required></td>
+        <td><button class="btn-action btn-delete" onclick="removeRow(\${rowId})">X</button></td>
+      \`;
+      tbody.appendChild(row);
+    }
+
+    function removeRow(id) {
+      document.getElementById(\`row-\${id}\`).remove();
+      calculateTotal();
+    }
+
+    function updateRowTotal(id) {
+      calculateTotal();
+    }
+
+    function calculateTotal() {
+      let total = 0;
+      const rows = document.querySelectorAll('#purchaseItemsTbody tr');
+      rows.forEach(row => {
+        const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        total += qty * price;
+      });
+      document.getElementById('purchaseTotal').innerText = \`$\${total.toFixed(2)}\`;
+    }
+
+    function openPurchaseModal() {
+      document.getElementById('purchaseModal').style.display = 'flex';
+      document.getElementById('purchaseItemsTbody').innerHTML = '';
+      document.getElementById('purchaseTotal').innerText = '$0.00';
+      addItemRow();
+    }
+
+    function closePurchaseModal() {
+      document.getElementById('purchaseModal').style.display = 'none';
+    }
+
+    document.getElementById('purchaseForm').onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const items = [];
+      const rows = document.querySelectorAll('#purchaseItemsTbody tr');
+      
+      for (const row of rows) {
+        items.push({
+          id: parseInt(row.querySelector('.item-prod').value),
+          quantity: parseInt(row.querySelector('.item-qty').value),
+          price: parseFloat(row.querySelector('.item-price').value)
+        });
+      }
+
+      const data = {
+        supplierId: parseInt(document.getElementById('purchaseSupplier').value),
+        userId: JSON.parse(localStorage.getItem("currentUser")).id,
+        total: parseFloat(document.getElementById('purchaseTotal').innerText.replace('$', '')),
+        items: items
+      };
+
+      const response = await window.api.apiCall('purchases', 'createPurchase', data);
+      if (response.success) {
+        alert("Compra registrada exitosamente. El stock ha sido actualizado.");
+        closePurchaseModal();
+        loadPurchases();
+      } else {
+        alert("Error: " + response.msg);
+      }
+    };
+
+    // ✅ FIX: función viewPurchaseDetails faltante
+    async function viewPurchaseDetails(id) {
+      const response = await window.api.apiCall('purchases', 'getPurchaseDetails', id);
+      if (!response.success) {
+        alert('Error al cargar detalle: ' + response.error);
+        return;
+      }
+      const { header, items } = response.data;
+
+      // Llenar cabecera
+      const headerDiv = document.getElementById('purchaseDetailHeader');
+      headerDiv.innerHTML = `
+        <div><span style="color:#a0aec0; font-size:12px;">Compra #</span><strong>${header.id}</strong></div>
+        <div><span style="color:#a0aec0; font-size:12px;">Fecha:</span><strong>${new Date(header.date).toLocaleString()}</strong></div>
+        <div><span style="color:#a0aec0; font-size:12px;">Proveedor:</span><strong>${header.supplier_name || 'N/A'}</strong></div>
+        <div><span style="color:#a0aec0; font-size:12px;">Registrado por:</span><strong>${header.user_name || 'Sistema'}</strong></div>
+      `;
+
+      // Llenar items
+      const tbody = document.getElementById('purchaseDetailItems');
+      tbody.innerHTML = '';
+      items.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.product_name}</td>
+          <td>${item.qty}</td>
+          <td>$${parseFloat(item.unit_price).toFixed(2)}</td>
+          <td>$${parseFloat(item.total).toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('purchaseDetailTotal').innerText = `$${parseFloat(header.total).toFixed(2)}`;
+      document.getElementById('purchaseDetailModal').style.display = 'flex';
+    }
+
+    function closePurchaseDetailModal() {
+      document.getElementById('purchaseDetailModal').style.display = 'none';
+    }
+
+    window.onload = async () => {
+      window.cachedProducts = await loadProducts();
+      await loadSuppliers();
+      await loadPurchases();
+    };
+  </script>
+</body>
+</html>
+
+(End of file - total 338 lines)
+</content>
