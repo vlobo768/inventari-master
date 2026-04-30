@@ -29,6 +29,7 @@ const ProductService = {
         p.min_stock,
         p.date,
         p.media_id,
+        p.is_weighable,
         c.name AS category_name,
         m.file_name AS image
       FROM products p
@@ -62,7 +63,7 @@ const ProductService = {
    * Crear producto profesional
    */
   async addProduct(data) {
-    const { name, category, quantity, buyPrice, salePrice, sku, barcode, minStock, mediaId } = data;
+    const { name, category, quantity, buyPrice, salePrice, sku, barcode, minStock, mediaId, isWeighable } = data;
     
     if (!name || !category) throw new Error("Nombre y categoría son obligatorios.");
 
@@ -79,15 +80,20 @@ const ProductService = {
     const photo = (!mediaId || mediaId === "") ? 0 : mediaId;
     const date = new Date().toISOString().split('T')[0];
 
-    const sql = `
-      INSERT INTO products 
-      (name, quantity, buy_price, sale_price, categorie_id, media_id, date, sku, barcode, min_stock) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const [result] = await db.execute(sql, [
-      name, quantity || 0, buyPrice || 0, salePrice || 0, category, photo, date, sku || null, barcode || null, minStock || 0
-    ]);
+    const CoreService = require('./core');
+    const result = await CoreService.agregar('products', {
+      name, 
+      quantity: quantity || 0, 
+      buy_price: buyPrice || 0, 
+      sale_price: salePrice || 0, 
+      categorie_id: category, 
+      media_id: photo, 
+      date, 
+      sku: sku || null, 
+      barcode: barcode || null, 
+      min_stock: minStock || 0,
+      is_weighable: isWeighable ? 1 : 0
+    });
 
     // Registrar movimiento inicial en Kardex
     await this.recordMovement(result.insertId, 'IN', quantity || 0, 'Carga inicial');
@@ -99,7 +105,7 @@ const ProductService = {
    * Actualizar producto profesional
    */
   async updateProduct(id, data) {
-    const { name, category, quantity, buyPrice, salePrice, sku, barcode, minStock, mediaId } = data;
+    const { name, category, quantity, buyPrice, salePrice, sku, barcode, minStock, mediaId, isWeighable } = data;
     
     if (!id) throw new Error("ID de producto requerido.");
 
@@ -125,6 +131,7 @@ const ProductService = {
     if (barcode !== undefined) { updates.push("barcode = ?"); params.push(barcode); }
     if (minStock !== undefined) { updates.push("min_stock = ?"); params.push(minStock); }
     if (mediaId !== undefined) { updates.push("media_id = ?"); params.push(mediaId || 0); }
+    if (isWeighable !== undefined) { updates.push("is_weighable = ?"); params.push(isWeighable ? 1 : 0); }
 
     if (updates.length === 0) return { success: false, msg: "No hay cambios." };
 

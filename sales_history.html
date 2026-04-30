@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Historial de Ventas - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=6">
   <style>
     body {
       flex-direction: column;
@@ -37,86 +37,7 @@
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .btn-nav:hover {
-      background: #00d2ff;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 20px;
-    }
-    .search-box {
-      flex: 1;
-      display: flex;
-      gap: 10px;
-    }
-    .search-box input {
-      flex: 1;
-      padding: 10px 15px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      outline: none;
-    }
-    .search-box input:focus {
-      border-color: #00d2ff;
-    }
-    .table-container {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      color: #fff;
-      font-size: 14px;
-    }
-    th {
-      text-align: left;
-      padding: 15px;
-      background: rgba(255,255,255,0.1);
-      color: #00d2ff;
-      border-bottom: 2px solid rgba(255,255,255,0.1);
-    }
-    td {
-      padding: 12px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    tr:hover {
-      background: rgba(255,255,255,0.03);
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-action {
-      padding: 5px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    .btn-detail:hover { background: #3498db; border-color: #3498db; }
+    .actions { display: flex; gap: 10px; }
 
     /* Modals */
     .modal {
@@ -259,20 +180,39 @@
         tbody.innerHTML = '';
 
         sales.forEach(s => {
+          const userStr = localStorage.getItem("currentUser");
+          const user = userStr ? JSON.parse(userStr) : {};
+          const userLevel = user.user_level || user.level;
+
           const row = document.createElement('tr');
-          row.innerHTML = \`
-            <td>#\${s.id}</td>
-            <td>\${s.customer_name || 'Cliente General'}</td>
-            <td>\${s.date}</td>
-            <td>\${s.seller_name || 'Sist.'}</td>
-            <td>$\${s.total}</td>
-            <td>\${s.payment_method}</td>
+          row.innerHTML = `
+            <td>#${s.id}</td>
+            <td>${s.customer_name || 'Cliente General'}</td>
+            <td>${s.date}</td>
+            <td>${s.seller_name || 'Sist.'}</td>
+            <td>$${s.total}</td>
+            <td>${s.payment_method}</td>
             <td class="actions">
-              <button class="btn-action btn-detail" onclick="viewSaleDetails(\${s.id})">Ver Detalle</button>
+              <button class="btn-action btn-status" onclick="viewSaleDetails(${s.id})">Detalle</button>
+              ${s.status !== 'cancelled' && userLevel == 1 
+                ? `<button class="btn-action btn-delete" onclick="cancelSale(${s.id})">Anular</button>` 
+                : (s.status === 'cancelled' ? '<span style="color:#e74c3c; font-size:12px; font-weight:bold;">Anulada</span>' : '')}
             </td>
-          \`;
+          `;
           tbody.appendChild(row);
         });
+      }
+    }
+
+    async function cancelSale(id) {
+      if (confirm("¿Estás seguro de anular esta venta? Esto restaurará el stock de los productos.")) {
+        const response = await window.api.apiCall('sales', 'deleteSale', id);
+        if (response.success) {
+          alert("Venta anulada correctamente.");
+          loadSales();
+        } else {
+          alert("Error al anular venta: " + (response.msg || response.error || "Desconocido"));
+        }
       }
     }
 
@@ -297,16 +237,16 @@
         tbody.innerHTML = '';
         items.forEach(i => {
           const row = document.createElement('tr');
-          row.innerHTML = \`
-            <td>\${i.product_name}</td>
-            <td>\${i.qty}</td>
-            <td>$\${i.unit_price}</td>
-            <td>$\${i.total}</td>
-          \`;
+          row.innerHTML = `
+            <td>${i.product_name}</td>
+            <td>${i.qty}</td>
+            <td>$${i.unit_price}</td>
+            <td>$${i.total}</td>
+          `;
           tbody.appendChild(row);
         });
 
-        document.getElementById('saleTotal').innerText = \`$\${header.total}\`;
+        document.getElementById('saleTotal').innerText = `$${header.total}`;
         document.getElementById('detailModal').style.display = 'flex';
       }
     }

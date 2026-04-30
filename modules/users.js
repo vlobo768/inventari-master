@@ -25,9 +25,9 @@ async function getAllUsers(filters = {}) {
 async function addUser(data) {
   try {
     const result = await UserService.createUser(data);
-    return { success: true, msg: "Usuario creado correctamente" };
+    return { success: true, message: "Usuario creado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
@@ -35,18 +35,18 @@ async function updateUser(data) {
   try {
     const { id, ...updateData } = data;
     const result = await UserService.updateUser(id, updateData);
-    return { success: true, msg: "Usuario actualizado correctamente" };
+    return { success: true, message: "Usuario actualizado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
 async function deleteUser(id) {
   try {
     const result = await UserService.deleteUser(id);
-    return { success: true, msg: "Usuario eliminado correctamente" };
+    return { success: true, message: "Usuario eliminado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 

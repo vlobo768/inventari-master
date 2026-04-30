@@ -4,6 +4,15 @@ const CustomerService = require('../services/customerService');
  * CLIENTES - MÓDULO DE COMUNICACIÓN IPC
  */
 
+async function getCustomerById(id) {
+  try {
+    const customer = await CustomerService.getCustomerById(id);
+    return { success: true, data: customer };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 async function getAllCustomers(filters = {}) {
   try {
     const customers = await CustomerService.getAllCustomers(filters);
@@ -15,10 +24,10 @@ async function getAllCustomers(filters = {}) {
 
 async function addCustomer(data) {
   try {
-    await CustomerService.addCustomer(data);
-    return { success: true, msg: "Cliente agregado correctamente" };
+    const result = await CustomerService.addCustomer(data);
+    return { success: true, message: "Cliente agregado", data: { id: result.id } };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
@@ -26,22 +35,24 @@ async function updateCustomer(data) {
   try {
     const { id, ...updateData } = data;
     await CustomerService.updateCustomer(id, updateData);
-    return { success: true, msg: "Cliente actualizado correctamente" };
+    return { success: true, message: "Cliente actualizado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
 async function deleteCustomer(id) {
   try {
     await CustomerService.deleteCustomer(id);
-    return { success: true, msg: "Cliente eliminado correctamente" };
+    return { success: true, message: "Cliente eliminado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
+
 module.exports = {
+  getCustomerById,
   getAllCustomers,
   addCustomer,
   updateCustomer,

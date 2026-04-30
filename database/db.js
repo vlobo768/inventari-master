@@ -1,42 +1,54 @@
 const mysql = require('mysql2');
 
+/**
+ * CONFIGURACIÓN CENTRALIZADA DE BASE DE DATOS
+ * Se utiliza 127.0.0.1 en lugar de localhost para evitar conflictos de resolución IPv6 (::1)
+ */
 const pool = mysql.createPool({
-    host: 'localhost',
+    host: '127.0.0.1', 
     user: 'root',
     password: '',
-    database: 'oswa_inv', // <--- Cambia 'mi_proyecto' por 'oswa_inv'
+    database: 'oswa_inv',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
 });
 
 const promisePool = pool.promise();
 
-// Polyfills for legacy sqlite3 methods (db.all, db.get, db.run)
-promisePool.get = function(sql, params, callback) {
-    if (typeof params === 'function') { callback = params; params = []; }
-    this.execute(sql, params)
-        .then(([rows]) => callback(null, rows[0] || null))
-        .catch(err => callback(err, null));
-};
+/**
+ * Verifica la disponibilidad de la base de datos
+ */
+async function testConnection() {
+    try {
+        const connection = await promisePool.getConnection();
+        await connection.ping();
+        connection.release();
+        return { success: true };
+    } catch (error) {
+        console.error('❌ DB Connection Test Failed:', error.message);
+        return { success: false, error: error.message };
+    }
+}
 
-promisePool.all = function(sql, params, callback) {
-    if (typeof params === 'function') { callback = params; params = []; }
-    this.execute(sql, params)
-        .then(([rows]) => callback(null, rows))
-        .catch(err => callback(err, null));
+module.exports = {
+    execute: async (sql, params) => {
+        try { return await promisePool.execute(sql, params); } 
+        catch (e) { 
+            if (e.code === 'ECONNRESET') return await promisePool.execute(sql, params); 
+            throw e; 
+        }
+    },
+    query: async (sql, params) => {
+        try { return await promisePool.query(sql, params); } 
+        catch (e) { 
+            if (e.code === 'ECONNRESET') return await promisePool.query(sql, params); 
+            throw e; 
+        }
+    },
+    getConnection: () => promisePool.getConnection(),
+    testConnection,
+    pool: promisePool
 };
-
-promisePool.run = function(sql, params, callback) {
-    if (typeof params === 'function') { callback = params; params = []; }
-    this.execute(sql, params)
-        .then(([result]) => {
-            const context = { changes: result.affectedRows, lastID: result.insertId };
-            if (callback) callback.call(context, null);
-        })
-        .catch(err => {
-            if (callback) callback.call({}, err);
-        });
-};
-
-module.exports = promisePool;

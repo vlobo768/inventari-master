@@ -171,20 +171,60 @@
       transform: scale(1.02);
       box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
     }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+    .btn-nav {-radius: 0; margin-left: -1px;}
+    
+    
     .btn-nav:hover { background: #00d2ff; color: #000; }
     .empty-cart {
       text-align: center;
       color: #a0aec0;
       margin-top: 50px;
       font-size: 14px;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1a2a3a;
+      padding: 20px;
+      border-radius: 12px;
+      width: 400px;
+      max-width: 90%;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      color: #fff;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .modal-header h2 { color: #00d2ff; font-size: 18px; margin: 0; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: #a0aec0;
+      line-height: 1;
+    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 12px; color: #a0aec0; margin-bottom: 5px; }
+    .form-group input { 
+      width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); 
+      border: 1px solid rgba(255,255,255,0.2); color: #fff; box-sizing: border-box; outline: none;
+    }
+    .btn-save {
+      background: #2ecc71; color: #fff; border: none; padding: 10px 20px;
+      border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;
     }
   </style>
 </head>
@@ -221,9 +261,13 @@
       <div class="checkout-section">
         <div class="checkout-form">
           <label style="font-size: 12px; color: #a0aec0;">Cliente</label>
-          <select id="customerSelect">
-            <option value="">Cliente General</option>
-          </select>
+          <div style="display: flex; gap: 5px;">
+            <input type="text" id="customerSearchInput" list="customerList" placeholder="Buscar o seleccionar cliente..." oninput="handleCustomerSelect()" style="flex: 1; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; outline: none;">
+            <datalist id="customerList"></datalist>
+            <input type="hidden" id="customerSelect" value="">
+            <button onclick="openCustomerModal()" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; padding: 0 10px;">+ Nuevo</button>
+          </div>
+          <div id="customerCreditDisplay" style="font-size: 13px; color: #00d2ff; margin-top: -5px; font-weight: bold; display: none;">Crédito Disponible: $0.00</div>
 
           <label style="font-size: 12px; color: #a0aec0;">Método de Pago</label>
           <select id="paymentMethod">
@@ -236,11 +280,11 @@
 
         <div class="checkout-row" style="margin-top: 20px;">
           <span>Subtotal:</span>
-          <span id="subtotal">$0.00</span>
+          <span id="subtotal" style="text-align: right;">$0.00 <br><span style="font-size:14px; color:#a0aec0;">Bs 0.00</span></span>
         </div>
         <div class="total-row">
           <span>Total:</span>
-          <span id="totalAmount">$0.00</span>
+          <span id="totalAmount" style="text-align: right;">$0.00 <br><span style="font-size:16px; color:#a0aec0;">Bs 0.00</span></span>
         </div>
 
         <button class="btn-pay" id="btnPay" onclick="processSale()">✔ Completar Venta</button>
@@ -248,8 +292,50 @@
     </div>
   </div>
 
+  <!-- Modal Peso -->
+  <div id="weightModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Peso del Producto</h2>
+        <span class="close-modal" onclick="closeWeightModal()">&times;</span>
+      </div>
+      <div class="form-group">
+        <label>Ingrese el peso en Gramos o Kilos (Ej. 0.500 para medio kilo, 1.250 para 1 kilo y cuarto)</label>
+        <input type="number" step="0.001" id="weightInput" placeholder="Ej: 0.500">
+      </div>
+      <button class="btn-save" onclick="confirmWeight()">Confirmar Peso</button>
+    </div>
+  </div>
+
+  <!-- Modal Cliente -->
+  <div id="customerModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nuevo Cliente</h2>
+        <span class="close-modal" onclick="closeCustomerModal()">&times;</span>
+      </div>
+      <form id="customerForm" onsubmit="saveNewCustomer(event)">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" id="custName" required>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" id="custPhone">
+        </div>
+        <div class="form-group">
+          <label>Crédito Disponible ($)</label>
+          <input type="number" step="0.01" id="custCredit" value="0.00">
+        </div>
+        <button type="submit" class="btn-save">Guardar Cliente</button>
+      </form>
+    </div>
+  </div>
+
   <script>
     let cart = [];
+    let currentBcvRate = 1.00;
+    let pendingWeighableProduct = null;
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
     if (!currentUser) {
@@ -268,14 +354,19 @@
       }
     }
 
-    // ✅ FIX: Búsqueda sin mínimo de caracteres
+    // ✅ FIX: Búsqueda con Debounce para evitar race conditions e IPC flooding
+    let searchTimeout;
     async function searchProducts() {
-      const query = document.getElementById('productSearch').value;
-      const response = await window.api.apiCall('products', 'getAllProducts', { search: query });
-      if (response.success) {
-        renderProducts(response.data);
-      }
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(async () => {
+        const query = document.getElementById('productSearch').value;
+        const response = await window.api.apiCall('products', 'getAllProducts', { search: query });
+        if (response.success) {
+          renderProducts(response.data);
+        }
+      }, 300);
     }
+
 
     function renderProducts(products) {
       const grid = document.getElementById('productGrid');
@@ -294,9 +385,9 @@
         const stockClass = p.quantity <= p.min_stock ? 'stock-low' : '';
         card.innerHTML = `
           <h3>${p.name}</h3>
-          <div class="price">$${parseFloat(p.sale_price).toFixed(2)}</div>
+          <div class="price">$${parseFloat(p.sale_price).toFixed(2)} <br><span style="font-size: 12px; color: #a0aec0;">Bs ${(parseFloat(p.sale_price) * currentBcvRate).toFixed(2)}</span></div>
           <div class="stock-info ${stockClass}">
-            ${hasStock ? `Stock: ${p.quantity}` : '⚠ Sin stock'}
+            ${hasStock ? `Stock: ${parseFloat(p.quantity)}` : '⚠ Sin stock'} ${p.is_weighable ? '(Pesable)' : ''}
           </div>
           ${p.sku ? `<div class="stock-info">SKU: ${p.sku}</div>` : ''}
         `;
@@ -304,32 +395,82 @@
       });
     }
 
-    function addToCart(product) {
+    function addToCart(product, forcedQuantity = null) {
+      if (product.is_weighable && forcedQuantity === null) {
+        pendingWeighableProduct = product;
+        document.getElementById('weightModal').style.display = 'flex';
+        document.getElementById('weightInput').value = '';
+        setTimeout(() => document.getElementById('weightInput').focus(), 100);
+        return;
+      }
+
+      const qtyToAdd = parseFloat(forcedQuantity !== null ? forcedQuantity : 1);
+      const productMaxStock = parseFloat(product.quantity);
       const existing = cart.find(item => item.id === product.id);
+      
       if (existing) {
-        if (existing.quantity < product.quantity) {
-          existing.quantity++;
+        if ((existing.quantity + qtyToAdd) <= productMaxStock) {
+          existing.quantity += qtyToAdd;
           existing.total = existing.quantity * existing.price;
         } else {
           alert("No hay más stock disponible para este producto.");
           return;
         }
       } else {
+        if (qtyToAdd > productMaxStock) {
+          alert("Stock insuficiente.");
+          return;
+        }
         cart.push({
           id: product.id,
           name: product.name,
           price: parseFloat(product.sale_price),
-          quantity: 1,
-          total: parseFloat(product.sale_price)
+          quantity: qtyToAdd,
+          maxStock: productMaxStock,
+          total: parseFloat(product.sale_price) * qtyToAdd,
+          isWeighable: product.is_weighable
         });
       }
       renderCart();
     }
 
+    function closeWeightModal() {
+      document.getElementById('weightModal').style.display = 'none';
+      pendingWeighableProduct = null;
+    }
+
+    function confirmWeight() {
+      const w = parseFloat(document.getElementById('weightInput').value);
+      if (!w || w <= 0) {
+        alert("Por favor ingrese un peso válido.");
+        return;
+      }
+      if (pendingWeighableProduct) {
+        addToCart(pendingWeighableProduct, w);
+        closeWeightModal();
+      }
+    }
+
     function updateQty(id, delta) {
       const idx = cart.findIndex(i => i.id === id);
       if (idx === -1) return;
-      cart[idx].quantity += delta;
+      
+      let newQty = cart[idx].quantity;
+      if (cart[idx].isWeighable) {
+        newQty += (delta > 0 ? 0.1 : -0.1);
+        newQty = parseFloat(newQty.toFixed(3));
+      } else {
+        newQty += delta;
+      }
+      
+      // ✅ VALIDACIÓN DE STOCK REAL AL INCREMENTAR DESDE EL CARRITO
+      if (newQty > cart[idx].maxStock) {
+        alert("No hay más stock disponible para este producto.");
+        return;
+      }
+
+      cart[idx].quantity = newQty;
+      
       if (cart[idx].quantity <= 0) {
         cart.splice(idx, 1);
       } else {
@@ -345,8 +486,8 @@
 
       if (cart.length === 0) {
         container.innerHTML = '<div class="empty-cart">El carrito está vacío</div>';
-        document.getElementById('subtotal').innerText = '$0.00';
-        document.getElementById('totalAmount').innerText = '$0.00';
+        document.getElementById('subtotal').innerHTML = `$0.00 <br><span style="font-size:14px; color:#a0aec0;">Bs 0.00</span>`;
+        document.getElementById('totalAmount').innerHTML = `$0.00 <br><span style="font-size:16px; color:#a0aec0;">Bs 0.00</span>`;
         return;
       }
 
@@ -361,7 +502,7 @@
           </div>
           <div class="cart-item-controls">
             <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
-            <span>${item.quantity}</span>
+            <span style="font-size:12px;">${parseFloat(item.quantity).toFixed(3).replace(/\.?0+$/, '')}</span>
             <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
             <span style="font-weight: bold; min-width: 60px; text-align: right;">$${item.total.toFixed(2)}</span>
           </div>
@@ -369,18 +510,36 @@
         container.appendChild(div);
       });
 
-      document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
-      document.getElementById('totalAmount').innerText = `$${total.toFixed(2)}`;
+      document.getElementById('subtotal').innerHTML = `$${total.toFixed(2)} <br><span style="font-size:14px; color:#a0aec0;">Bs ${(total * currentBcvRate).toFixed(2)}</span>`;
+      document.getElementById('totalAmount').innerHTML = `$${total.toFixed(2)} <br><span style="font-size:16px; color:#a0aec0;">Bs ${(total * currentBcvRate).toFixed(2)}</span>`;
     }
 
+    let customersData = [];
     async function loadCustomers() {
       const response = await window.api.apiCall('customers', 'getAllCustomers');
       if (response && response.success) {
-        const select = document.getElementById('customerSelect');
-        response.data.forEach(c => {
-          const opt = new Option(c.name, c.id);
-          select.add(opt);
+        customersData = response.data;
+        const datalist = document.getElementById('customerList');
+        datalist.innerHTML = '';
+        customersData.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.name;
+          datalist.appendChild(opt);
         });
+      }
+    }
+
+    function handleCustomerSelect() {
+      const inputName = document.getElementById('customerSearchInput').value;
+      const customer = customersData.find(c => c.name === inputName);
+      document.getElementById('customerSelect').value = customer ? customer.id : '';
+      
+      const creditDisplay = document.getElementById('customerCreditDisplay');
+      if (customer) {
+        creditDisplay.style.display = 'block';
+        creditDisplay.innerText = `Crédito Disponible: $${(parseFloat(customer.credit_limit) || 0).toFixed(2)}`;
+      } else {
+        creditDisplay.style.display = 'none';
       }
     }
 
@@ -394,7 +553,7 @@
       btn.disabled = true;
       btn.innerText = 'Procesando...';
 
-      const totalText = document.getElementById('totalAmount').innerText.replace('$', '').replace(',', '');
+      const totalText = document.getElementById('totalAmount').innerText.split('$')[1].split('<')[0].trim();
       const saleData = {
         customerId: document.getElementById('customerSelect').value || null,
         userId: currentUser ? currentUser.id : null,
@@ -407,9 +566,25 @@
         const response = await window.api.apiCall('sales', 'addSale', saleData);
         if (response.success) {
           alert(`✅ Venta #${response.saleId} completada con éxito.\nTotal: $${saleData.total.toFixed(2)}`);
+          
+          // Abrir recibo
+          const customerName = document.getElementById('customerSearchInput').value || 'Consumidor Final';
+          if (window.api.openReceipt) {
+            window.api.openReceipt({
+              saleId: response.saleId,
+              customerName: customerName,
+              items: cart,
+              total: saleData.total,
+              bcvRate: currentBcvRate,
+              paymentMethod: saleData.paymentMethod
+            });
+          }
+
           cart = [];
           renderCart();
           await loadAllProducts(); // Recargar stock actualizado
+          await loadCustomers(); // Actualizar el crédito de clientes
+          handleCustomerSelect(); // Refrescar en UI el crédito disponible actual
         } else {
           alert("Error al procesar venta: " + response.msg);
         }
@@ -421,7 +596,75 @@
       }
     }
 
+    function openCustomerModal() {
+      document.getElementById('customerModal').style.display = 'flex';
+    }
+
+    function closeCustomerModal() {
+      document.getElementById('customerModal').style.display = 'none';
+      document.getElementById('customerForm').reset();
+    }
+
+    async function saveNewCustomer(e) {
+      e.preventDefault();
+      const name = document.getElementById('custName').value;
+      const phone = document.getElementById('custPhone').value;
+      const credit = parseFloat(document.getElementById('custCredit').value) || 0;
+
+      const response = await window.api.apiCall('customers', 'addCustomer', { name, phone, credit_limit: credit });
+      if (response.success) {
+        alert("Cliente guardado correctamente.");
+        await loadCustomers();
+        const newCust = response.data?.id;
+        if (newCust) {
+          document.getElementById('customerSelect').value = newCust;
+          document.getElementById('customerSearchInput').value = name;
+          handleCustomerSelect(); // Mostrar el crédito disponible recién ingresado
+        }
+        closeCustomerModal();
+      } else {
+        alert("Error al guardar cliente: " + response.msg);
+      }
+    }
+
+    // Escáner de Código de Barras Global
+    let barcodeString = '';
+    let barcodeTimeout = null;
+
+    document.addEventListener('keydown', async (e) => {
+      // Ignorar si estamos escribiendo en un input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (document.getElementById('weightModal').style.display === 'flex') return;
+
+      if (e.key === 'Enter') {
+        if (barcodeString.length > 2) {
+          // Procesar código
+          const response = await window.api.apiCall('products', 'getAllProducts', { search: barcodeString });
+          if (response.success && response.data.length > 0) {
+            // Asumimos que el primero es el match exacto del barcode o sku
+            const p = response.data.find(prod => prod.barcode === barcodeString || prod.sku === barcodeString) || response.data[0];
+            addToCart(p);
+          } else {
+            console.log("Producto no encontrado por escáner:", barcodeString);
+          }
+        }
+        barcodeString = '';
+      } else if (e.key.length === 1) {
+        barcodeString += e.key;
+        clearTimeout(barcodeTimeout);
+        barcodeTimeout = setTimeout(() => { barcodeString = ''; }, 100); // 100ms debounce
+      }
+    });
+
     window.onload = async () => {
+      const bcvRes = await window.api.apiCall('settings', 'getSetting', 'bcv_rate');
+      if (bcvRes && bcvRes.success && bcvRes.data) {
+        currentBcvRate = parseFloat(bcvRes.data);
+        // Forzar renderizado inicial para mostrar la tasa en estado vacío
+        document.getElementById('subtotal').innerHTML = `$0.00 <br><span style="font-size:14px; color:#a0aec0;">Bs 0.00</span>`;
+        document.getElementById('totalAmount').innerHTML = `$0.00 <br><span style="font-size:16px; color:#a0aec0;">Bs 0.00</span>`;
+      }
+
       await loadCustomers();
       await loadAllProducts(); // ✅ Carga inmediata del catálogo
     };

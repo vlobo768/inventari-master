@@ -25,9 +25,9 @@ async function getAllCategories() {
 async function addCategory(data) {
   try {
     await CategoryService.addCategory(data);
-    return { success: true, msg: "Categoría agregada correctamente" };
+    return { success: true, message: "Categoría agregada correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
@@ -35,18 +35,18 @@ async function updateCategory(data) {
   try {
     const { id, ...updateData } = data;
     await CategoryService.updateCategory(id, updateData);
-    return { success: true, msg: "Categoría actualizada correctamente" };
+    return { success: true, message: "Categoría actualizada correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
 async function deleteCategory(id) {
   try {
     await CategoryService.deleteCategory(id);
-    return { success: true, msg: "Categoría eliminada" };
+    return { success: true, message: "Categoría eliminada" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 

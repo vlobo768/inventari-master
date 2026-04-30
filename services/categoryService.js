@@ -36,10 +36,11 @@ const CategoryService = {
     const { name, parent_id } = data;
     if (!name) throw new Error("El nombre es obligatorio.");
 
-    const [result] = await db.execute(
-      "INSERT INTO categories (name, parent_id) VALUES (?, ?)",
-      [name, parent_id || null]
-    );
+    const CoreService = require('./core');
+    const result = await CoreService.agregar('categories', {
+      name,
+      parent_id: parent_id || null
+    });
     return { success: true, id: result.insertId };
   },
 

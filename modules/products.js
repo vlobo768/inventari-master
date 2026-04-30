@@ -25,9 +25,9 @@ async function getAllProducts(filters = {}) {
 async function addProduct(data) {
   try {
     await ProductService.addProduct(data);
-    return { success: true, msg: "Producto añadido correctamente" };
+    return { success: true, message: "Producto añadido correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
@@ -35,18 +35,18 @@ async function updateProduct(data) {
   try {
     const { id, ...updateData } = data;
     await ProductService.updateProduct(id, updateData);
-    return { success: true, msg: "Producto actualizado correctamente" };
+    return { success: true, message: "Producto actualizado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 
 async function deleteProduct(id) {
   try {
     await ProductService.deleteProduct(id);
-    return { success: true, msg: "Producto eliminado correctamente" };
+    return { success: true, message: "Producto eliminado correctamente" };
   } catch (error) {
-    return { success: false, msg: error.message };
+    return { success: false, message: error.message };
   }
 }
 

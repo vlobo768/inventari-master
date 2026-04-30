@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración de Sistema</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    body { padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+    .settings-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 30px; 
+      border-radius: 20px;
+      width: 100%; 
+      max-width: 600px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      animation: fadeIn 0.8s ease-out;
+    }
+    .header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; max-width: 600px; margin-bottom: 30px;
+    }
+    .form-group input { font-size: 18px; font-weight: bold; color: #00d2ff; }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <h1 style="color: #00d2ff; font-size: 24px; font-weight: 600;">⚙ Configuración Global</h1>
+    <button class="btn-nav" onclick="window.location.href='dashboard.html'">Volver al Dashboard</button>
+  </div>
+  
+  <div class="settings-container">
+    <h2 style="font-size: 16px; color: #a0aec0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+      Gestión de Monedas y Tasas
+    </h2>
+    <div class="form-group">
+      <label>Tasa de Cambio BCV (Equivalente en Bolívares por 1 USD)</label>
+      <input type="number" id="bcvRate" step="0.01" placeholder="Ej: 45.30">
+      <small style="color: #cbd5e0; font-size: 11px; margin-top: 5px;">Este valor se reflejará instantáneamente en el módulo de ventas y catálogo de productos.</small>
+    </div>
+    
+    <button class="btn btn-add" id="btnSave" onclick="saveSettings()" style="margin-top: 20px;">💾 Guardar Configuración</button>
+  </div>
+
+  <div class="settings-container" style="margin-top: 20px;">
+    <h2 style="font-size: 16px; color: #a0aec0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+      🖨️ Impresión de Etiquetas de Productos
+    </h2>
+    <div class="form-group">
+      <label>Buscar Producto</label>
+      <input type="text" id="searchProductInput" placeholder="Nombre, SKU o Código..." oninput="searchBarcodeProducts()" style="margin-bottom: 10px;">
+      
+      <label>Seleccionar Producto</label>
+      <select id="barcodeProductSelect" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); outline: none;">
+        <option value="">-- Escriba para buscar --</option>
+      </select>
+    </div>
+    
+    <button class="btn btn-add" onclick="printBarcodeTicket()" style="margin-top: 20px; background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);">🖨️ Imprimir Etiqueta</button>
+  </div>
+
+  <script>
+    // 1. Verificación de Seguridad y Permisos
+    const userStr = localStorage.getItem("currentUser");
+    if (!userStr) {
+      window.location.href = "index.html";
+    } else {
+      const user = JSON.parse(userStr);
+      const level = user.user_level || user.level;
+      if (level != 1) { // Solo administradores (Nivel 1)
+        alert("🔒 Acceso Denegado: Esta sección es exclusiva para Administradores del sistema.");
+        window.location.href = "dashboard.html";
+      }
+    }
+
+    // 2. Cargar parámetros actuales de la base de datos
+    async function loadSettings() {
+      try {
+        const response = await window.api.apiCall('settings', 'getSetting', 'bcv_rate');
+        if (response && response.success && response.data) {
+          document.getElementById('bcvRate').value = response.data;
+        }
+      } catch (e) {
+        console.error("Error al cargar configuración:", e);
+      }
+    }
+
+    // 3. Guardar cambios en el servidor local
+    async function saveSettings() {
+      const btn = document.getElementById('btnSave');
+      const bcvRate = document.getElementById('bcvRate').value;
+      
+      if (!bcvRate || parseFloat(bcvRate) <= 0) {
+        alert("Por favor ingrese una tasa válida mayor a 0.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Guardando...';
+      
+      try {
+        const response = await window.api.apiCall('settings', 'updateSetting', { key: 'bcv_rate', value: bcvRate });
+        if (response && response.success) {
+          alert("✅ Configuración actualizada y propagada correctamente en el sistema.");
+        } else {
+          alert("Error al guardar: " + (response.msg || response.error || "Desconocido"));
+        }
+      } catch (e) {
+        alert("Error de conexión al guardar.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '💾 Guardar Configuración';
+      }
+    }
+
+    // 4. Lógica de Impresión de Etiquetas
+    let allProductsCache = [];
+
+    async function searchBarcodeProducts() {
+      const search = document.getElementById('searchProductInput').value;
+      if (search.length < 2 && search.length > 0) return; // Esperar al menos 2 caracteres
+
+      try {
+        const response = await window.api.apiCall('products', 'getAllProducts', { search });
+        if (response.success) {
+          allProductsCache = response.data;
+          const select = document.getElementById('barcodeProductSelect');
+          select.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+          
+          allProductsCache.forEach(p => {
+            const codeInfo = p.barcode || p.sku || `ID:${p.id}`;
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.text = `[${codeInfo}] ${p.name} - $${p.sale_price}`;
+            select.appendChild(opt);
+          });
+        }
+      } catch (error) {
+        console.error("Error buscando productos:", error);
+      }
+    }
+
+    async function printBarcodeTicket() {
+      const productId = document.getElementById('barcodeProductSelect').value;
+      if (!productId) {
+        alert("⚠️ Por favor, busque y seleccione un producto primero.");
+        return;
+      }
+
+      const product = allProductsCache.find(p => p.id == productId);
+      if (!product) return;
+
+      const bcvRate = document.getElementById('bcvRate').value || 1;
+
+      // Enviar datos al proceso principal para abrir la ventana
+      window.api.openBarcodeTicket({
+        id: product.id,
+        name: product.name,
+        barcode: product.barcode,
+        sku: product.sku,
+        sale_price: product.sale_price,
+        bcvRate: bcvRate
+      });
+    }
+
+    window.onload = loadSettings;
+  </script>
+</body>
+</html>

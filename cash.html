@@ -37,21 +37,12 @@
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .btn-nav:hover {
-      background: #00d2ff;
+    .nav-buttons { display: flex; gap: 10px; }
+.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+    .btn-nav {-radius: 0; margin-left: -1px;}
+    
+    
+    .btn-nav:hover { background: #00d2ff;
       color: #000;
       box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
     }
@@ -86,6 +77,12 @@
       max-width: 300px;
       margin: 0 auto;
     }
+    .cash-form label {
+      color: #a0aec0; 
+      font-size: 14px;
+      text-align: left;
+      margin-bottom: 5px;
+    }
     .cash-form input {
       padding: 12px;
       border-radius: 8px;
@@ -94,7 +91,10 @@
       color: #fff;
       text-align: center;
       font-size: 18px;
+      width: 100%;
+      box-sizing: border-box;
     }
+
     .btn-cash {
       padding: 12px;
       border-radius: 8px;
@@ -203,6 +203,19 @@
   </div>
 
   <script>
+    // RBAC check
+    const userStr = localStorage.getItem("currentUser");
+    if (!userStr) {
+      window.location.href = "index.html";
+    } else {
+      const user = JSON.parse(userStr);
+      const userLevel = user.user_level || user.level;
+      if (userLevel != 1 && userLevel != 2 && userLevel != 3) {
+        alert("Acceso denegado.");
+        window.location.href = "dashboard.html";
+      }
+    }
+
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
     async function checkSession() {
@@ -220,6 +233,15 @@
     }
 
     async function openCash() {
+      const userStr = localStorage.getItem("currentUser");
+      const user = userStr ? JSON.parse(userStr) : {};
+      const userLevel = user.user_level || user.level;
+
+      if (userLevel != 1 && userLevel != 2 && userLevel != 3) {
+        alert("No tienes permisos para abrir la caja.");
+        return;
+      }
+
       const balance = parseFloat(document.getElementById('startBalance').value);
       const userId = currentUser ? currentUser.id : null;
       
@@ -234,6 +256,15 @@
     }
 
     async function closeCash() {
+      const userStr = localStorage.getItem("currentUser");
+      const user = userStr ? JSON.parse(userStr) : {};
+      const userLevel = user.user_level || user.level;
+
+      if (userLevel != 1 && userLevel != 2 && userLevel != 3) {
+        alert("No tienes permisos para cerrar la caja.");
+        return;
+      }
+
       const balance = parseFloat(document.getElementById('endBalance').value);
       const session = await window.api.apiCall('cash', 'getActiveSession');
       

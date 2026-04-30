@@ -37,36 +37,8 @@
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .btn-nav:hover {
-      background: #00d2ff;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 20px;
-    }
-    .search-box {
-      flex: 1;
-      display: flex;
-      gap: 10px;
-    }
+    .nav-buttons { display: flex; gap: 10px; }
+.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -116,20 +88,11 @@
     tr:hover {
       background: rgba(255,255,255,0.03);
     }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-action {
-      padding: 5px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
+    .actions { display: flex; gap: 10px; }
+.btn-action { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 11px; transition: all 0.2s; } .btn-edit:hover { background: #3498db; border-color: #3498db; } .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; } .btn-status:hover { background: #f39c12; border-color: #f39c12; }
+    .btn-action {-radius: 0; margin-left: -1px;}
+    
+    
     .btn-detail:hover { background: #3498db; border-color: #3498db; }
 
     /* Modals */
@@ -173,7 +136,8 @@
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 20px;
+      align-items: end;
     }
     .form-group {
       display: flex;
@@ -182,15 +146,18 @@
     .form-group label {
       font-size: 12px;
       color: #cbd5e0;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      text-align: left;
     }
     .form-group select, .form-group input {
-      padding: 10px;
-      border-radius: 6px;
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(255,255,255,0.05);
       color: #fff;
       outline: none;
+      width: 100%;
+      box-sizing: border-box;
     }
     .items-section {
       background: rgba(0,0,0,0.2);
@@ -219,8 +186,8 @@
     .modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 15px;
+      margin-top: 30px;
     }
     .btn-save {
       background: #2ecc71;
@@ -369,6 +336,19 @@
   </div>
 
   <script>
+    // RBAC check
+    const userStr = localStorage.getItem("currentUser");
+    if (!userStr) {
+      window.location.href = "index.html";
+    } else {
+      const user = JSON.parse(userStr);
+      const userLevel = user.user_level || user.level;
+      if (userLevel != 1 && userLevel != 2) {
+        alert("Acceso denegado: No tienes permisos para gestionar compras.");
+        window.location.href = "dashboard.html";
+      }
+    }
+
     let purchaseItems = [];
 
     async function loadPurchases() {
@@ -382,18 +362,36 @@
 
         purchases.forEach(p => {
           const row = document.createElement('tr');
-          row.innerHTML = \`
-            <td>#\${p.id}</td>
-            <td>\${p.supplier_name}</td>
-            <td>\${p.date}</td>
-            <td>\${p.user_name}</td>
-            <td>$\${p.total}</td>
+          
+          const userStr = localStorage.getItem("currentUser");
+          const user = userStr ? JSON.parse(userStr) : {};
+          const userLevel = user.user_level || user.level;
+
+          row.innerHTML = `
+            <td>#${p.id}</td>
+            <td>${p.supplier_name}</td>
+            <td>${p.date}</td>
+            <td>${p.user_name}</td>
+            <td>$${p.total}</td>
             <td class="actions">
-              <button class="btn-action btn-detail" onclick="viewPurchaseDetails(\${p.id})">Detalle</button>
+              <button class="btn-action btn-detail" onclick="viewPurchaseDetails(${p.id})">Detalle</button>
+              ${userLevel == 1 ? `<button class="btn-action btn-delete" style="color: #e74c3c; border-color: #e74c3c;" onclick="deletePurchase(${p.id})">Eliminar</button>` : ''}
             </td>
-          \`;
+          `;
           tbody.appendChild(row);
         });
+      }
+    }
+
+    async function deletePurchase(id) {
+      if (confirm("¿Estás seguro de eliminar esta compra? Esto revertirá el stock de los productos asociados.")) {
+        const response = await window.api.apiCall('purchases', 'deletePurchase', id);
+        if (response.success) {
+          alert("Compra eliminada correctamente.");
+          loadPurchases();
+        } else {
+          alert("Error al eliminar: " + response.msg);
+        }
       }
     }
 
@@ -423,26 +421,26 @@
       const rowId = Date.now();
       
       const row = document.createElement('tr');
-      row.id = \`row-\${rowId}\`;
+      row.id = `row-${rowId}`;
       
-      let productOptions = products.map(p => \`<option value="\${p.id}">\${p.name} (Stock: \${p.quantity})</option>\`).join('');
+      let productOptions = products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.quantity})</option>`).join('');
       
-      row.innerHTML = \`
+      row.innerHTML = `
         <td>
-          <select class="item-prod" onchange="updateRowTotal(\${rowId})" required>
+          <select class="item-prod" onchange="updateRowTotal(${rowId})" required>
             <option value="">Seleccionar...</option>
-            \${productOptions}
+            ${productOptions}
           </select>
         </td>
-        <td><input type="number" class="item-qty" value="1" min="1" oninput="updateRowTotal(\${rowId})" required></td>
-        <td><input type="number" class="item-price" step="0.01" value="0.00" oninput="updateRowTotal(\${rowId})" required></td>
-        <td><button class="btn-action btn-delete" onclick="removeRow(\${rowId})">X</button></td>
-      \`;
+        <td><input type="number" class="item-qty" value="1" min="1" oninput="updateRowTotal(${rowId})" required></td>
+        <td><input type="number" class="item-price" step="0.01" value="0.00" oninput="updateRowTotal(${rowId})" required></td>
+        <td><button class="btn-action btn-delete" onclick="removeRow(${rowId})">X</button></td>
+      `;
       tbody.appendChild(row);
     }
 
     function removeRow(id) {
-      document.getElementById(\`row-\${id}\`).remove();
+      document.getElementById(`row-${id}`).remove();
       calculateTotal();
     }
 
@@ -458,10 +456,19 @@
         const price = parseFloat(row.querySelector('.item-price').value) || 0;
         total += qty * price;
       });
-      document.getElementById('purchaseTotal').innerText = \`$\${total.toFixed(2)}\`;
+      document.getElementById('purchaseTotal').innerText = `$${total.toFixed(2)}`;
     }
 
     function openPurchaseModal() {
+      const userStr = localStorage.getItem("currentUser");
+      const user = userStr ? JSON.parse(userStr) : {};
+      const userLevel = user.user_level || user.level;
+
+      if (userLevel != 1 && userLevel != 2) {
+        alert("No tienes permisos para registrar compras.");
+        return;
+      }
+
       document.getElementById('purchaseModal').style.display = 'flex';
       document.getElementById('purchaseItemsTbody').innerHTML = '';
       document.getElementById('purchaseTotal').innerText = '$0.00';

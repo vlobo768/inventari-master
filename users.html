@@ -37,36 +37,8 @@
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .btn-nav:hover {
-      background: #00d2ff;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 20px;
-    }
-    .search-box {
-      flex: 1;
-      display: flex;
-      gap: 10px;
-    }
+    .nav-buttons { display: flex; gap: 10px; }
+.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -125,20 +97,11 @@
     .status-active { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
     .status-inactive { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
     
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-action {
-      padding: 5px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
+    .actions { display: flex; gap: 10px; }
+.btn-action { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 11px; transition: all 0.2s; } .btn-edit:hover { background: #3498db; border-color: #3498db; } .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; } .btn-status:hover { background: #f39c12; border-color: #f39c12; }
+    .btn-action {-radius: 0; margin-left: -1px;}
+    
+    
     .btn-edit:hover { background: #3498db; border-color: #3498db; }
     .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
     .btn-status:hover { background: #f1c40f; border-color: #f1c40f; color: #000; }
@@ -179,7 +142,8 @@
     .modal-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 20px;
+      align-items: end;
     }
     .modal-form .form-group {
       display: flex;
@@ -191,22 +155,27 @@
     .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      text-align: left;
     }
     .modal-form input, .modal-form select {
-      padding: 10px;
-      border-radius: 6px;
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(255,255,255,0.05);
       color: #fff;
       outline: none;
+      width: 100%;
+      box-sizing: border-box;
     }
     .modal-footer {
-      margin-top: 20px;
+      margin-top: 30px;
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 15px;
+      grid-column: span 2;
     }
+
     .btn-save {
       background: #2ecc71;
       color: #fff;
@@ -294,23 +263,23 @@
         <input type="hidden" id="userId">
         <div class="form-group full">
           <label>Nombre Completo</label>
-          <input type="text" id="userName" required>
+          <input type="text" id="userName" required placeholder="Ej. Juan Pérez">
         </div>
         <div class="form-group">
           <label>Nombre de Usuario</label>
-          <input type="text" id="userUsername" required>
+          <input type="text" id="userUsername" required placeholder="usuario123">
         </div>
         <div class="form-group">
           <label>Contraseña</label>
-          <input type="password" id="userPassword">
+          <input type="password" id="userPassword" placeholder="********">
         </div>
         <div class="form-group">
           <label>Correo Electrónico</label>
-          <input type="email" id="userEmail">
+          <input type="email" id="userEmail" placeholder="correo@ejemplo.com">
         </div>
         <div class="form-group">
           <label>Teléfono</label>
-          <input type="text" id="userPhone">
+          <input type="text" id="userPhone" placeholder="+56 9 ...">
         </div>
         <div class="form-group">
           <label>Rol / Nivel</label>
@@ -325,7 +294,7 @@
             <option value="0">Inactivo</option>
           </select>
         </div>
-        <div class="modal-footer full">
+        <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="closeUserModal()">Cancelar</button>
           <button type="submit" class="btn-save">Guardar Usuario</button>
         </div>
@@ -340,8 +309,9 @@
       window.location.href = "index.html";
     } else {
       const user = JSON.parse(userStr);
-      if (user.user_level != 1 && user.user_level != 2) {
-        alert("No tienes permisos para acceder a esta sección.");
+      const userLevel = user.user_level || user.level;
+      if (userLevel != 1) {
+        alert("Acceso denegado: Solo el Administrador puede gestionar usuarios.");
         window.location.href = "dashboard.html";
       }
     }
@@ -377,23 +347,23 @@
 
         users.forEach(u => {
           const row = document.createElement('tr');
-          row.innerHTML = \`
-            <td>\${u.name}</td>
-            <td>\${u.username}</td>
-            <td>\${u.email || 'N/A'}</td>
-            <td>\${u.phone || 'N/A'}</td>
-            <td>\${u.role}</td>
+          row.innerHTML = `
+            <td>${u.name}</td>
+            <td>${u.username}</td>
+            <td>${u.email || 'N/A'}</td>
+            <td>${u.phone || 'N/A'}</td>
+            <td>${u.role || 'N/A'}</td>
             <td>
-              <span class="status-badge \${u.status == 1 ? 'status-active' : 'status-inactive'}">
-                \${u.status == 1 ? 'Activo' : 'Inactivo'}
+              <span class="status-badge ${u.status == 1 ? 'status-active' : 'status-inactive'}">
+                ${u.status == 1 ? 'Activo' : 'Inactivo'}
               </span>
             </td>
             <td class="actions">
-              <button class="btn-action btn-edit" onclick="editUser(\${u.id})">Editar</button>
-              <button class="btn-action btn-status" onclick="toggleStatus(\${u.id}, \${u.status})">Estado</button>
-              <button class="btn-action btn-delete" onclick="deleteUser(\${u.id})">Eliminar</button>
+              <button class="btn-action btn-edit" onclick="editUser(${u.id})">Editar</button>
+              <button class="btn-action btn-status" onclick="toggleStatus(${u.id}, ${u.status})">Estado</button>
+              <button class="btn-action btn-delete" onclick="deleteUser(${u.id})">Eliminar</button>
             </td>
-          \`;
+          `;
           tbody.appendChild(row);
         });
       }
@@ -421,8 +391,8 @@
 
     async function loadUserData(id) {
       const response = await window.api.apiCall('users', 'getUserProfile', id);
-      if (response) {
-        const u = response;
+      if (response && response.success && response.data) {
+        const u = response.data;
         document.getElementById('userId').value = u.id;
         document.getElementById('userName').value = u.name;
         document.getElementById('userUsername').value = u.username;
@@ -459,7 +429,7 @@
         closeUserModal();
         loadUsers();
       } else {
-        alert("Error: " + response.msg);
+        alert("Error: " + response.message);
       }
     };
 
@@ -469,7 +439,7 @@
         if (response.success) {
           loadUsers();
         } else {
-          alert("Error al eliminar");
+          alert("Error: " + response.message);
         }
       }
     }

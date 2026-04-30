@@ -4,6 +4,11 @@ const db = require('../database/db');
  * Profesional Supplier Service
  */
 const SupplierService = {
+  async getSupplierById(id) {
+    const [rows] = await db.execute("SELECT * FROM suppliers WHERE id = ?", [id]);
+    return rows[0] || null;
+  },
+
   async getAllSuppliers(filters = {}) {
     const { search } = filters;
     let sql = `SELECT * FROM suppliers WHERE 1=1`;
@@ -22,10 +27,14 @@ const SupplierService = {
     const { name, contact_name, phone, email, address } = data;
     if (!name) throw new Error("El nombre del proveedor es obligatorio.");
 
-    const [result] = await db.execute(
-      "INSERT INTO suppliers (name, contact_name, phone, email, address) VALUES (?, ?, ?, ?, ?)",
-      [name, contact_name || null, phone || null, email || null, address || null]
-    );
+    const CoreService = require('./core');
+    const result = await CoreService.agregar('suppliers', {
+      name,
+      contact_name: contact_name || null,
+      phone: phone || null,
+      email: email || null,
+      address: address || null
+    });
     return { success: true, id: result.insertId };
   },
 

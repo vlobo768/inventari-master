@@ -16,39 +16,72 @@ const SaleService = {
     try {
       await connection.beginTransaction();
 
+      const CoreService = require('./core');
+
       // 1. Insertar Cabecera de Venta
-      const [headerResult] = await connection.execute(
-        "INSERT INTO sales_header (customer_id, user_id, total, payment_method) VALUES (?, ?, ?, ?)",
-        [customerId || null, userId || null, total, paymentMethod || 'Efectivo']
-      );
+      const headerResult = await CoreService.agregar('sales_header', {
+        customer_id: customerId || null,
+        user_id: userId || null,
+        total: total,
+        payment_method: paymentMethod || 'Efectivo'
+      }, connection);
       const saleId = headerResult.insertId;
 
-      // 2. Insertar Items y Actualizar Stock
-      for (const item of items) {
-        await connection.execute(
-          "INSERT INTO sales_items (sale_id, product_id, qty, unit_price, total) VALUES (?, ?, ?, ?, ?)",
-          [saleId, item.id, item.quantity, item.price, item.quantity * item.price]
-        );
+       // 2. Insertar Items y Actualizar Stock
+       for (const item of items) {
+         await CoreService.agregar('sales_items', {
+           sale_id: saleId,
+           product_id: item.id,
+           qty: item.quantity,
+           unit_price: item.price,
+           total: item.quantity * item.price
+         }, connection);
+         
+         // Descontar stock (con validación de suficiencia y precisión decimal)
+         const [prodResult] = await connection.execute(
+           "UPDATE products SET quantity = quantity - CAST(? AS DECIMAL(10,3)) WHERE id = ? AND quantity >= CAST(? AS DECIMAL(10,3))",
+           [item.quantity, item.id, item.quantity]
+         );
+         
+         if (prodResult.affectedRows === 0) {
+           throw new Error(`Stock insuficiente para el producto ID ${item.id}`);
+         }
+         
+         // Registrar en Kardex
+         await CoreService.agregar('inventory_movements', {
+           product_id: item.id,
+           type: 'OUT',
+           qty: item.quantity,
+           reference: `Venta #${saleId}`,
+           user_id: userId || null
+         }, connection);
+       }
+       
+       // ✅ VALIDACIÓN DE CRÉDITO: Descontar del crédito disponible
+       if (paymentMethod === 'Crédito' && customerId) {
+         const [custRows] = await connection.execute(
+           "SELECT credit_limit FROM customers WHERE id = ?", 
+           [customerId]
+         );
+         if (custRows.length > 0) {
+           const availableCredit = parseFloat(custRows[0].credit_limit) || 0;
+           if (availableCredit < total) {
+             throw new Error(`Crédito disponible insuficiente. Crédito disponible: $${availableCredit.toFixed(2)}, Total venta: $${total}`);
+           }
+           
+           // Descontar el crédito disponible
+           await connection.execute(
+             "UPDATE customers SET credit_limit = credit_limit - ? WHERE id = ?",
+             [total, customerId]
+           );
+         } else {
+           throw new Error("Cliente no encontrado para validar crédito.");
+         }
+       }
 
-        // Descontar stock (con validación de suficiencia)
-        const [prodResult] = await connection.execute(
-          "UPDATE products SET quantity = quantity - ? WHERE id = ? AND quantity >= ?",
-          [item.quantity, item.id, item.quantity]
-        );
+       await connection.commit();
+       return { success: true, saleId };
 
-        if (prodResult.affectedRows === 0) {
-          throw new Error(`Stock insuficiente para el producto ID ${item.id}`);
-        }
-
-        // Registrar en Kardex
-        await connection.execute(
-          "INSERT INTO inventory_movements (product_id, type, qty, reference, user_id) VALUES (?, 'OUT', ?, ?, ?)",
-          [item.id, item.quantity, `Venta #${saleId}`, userId || null]
-        );
-      }
-
-      await connection.commit();
-      return { success: true, saleId };
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -174,6 +207,14 @@ const SaleService = {
         await connection.execute(
           "INSERT INTO inventory_movements (product_id, type, qty, reference) VALUES (?, 'ADJUSTMENT', ?, ?)",
           [item.product_id, item.qty, `Anulación Venta #${saleId}`]
+        );
+      }
+
+      // Restaurar crédito disponible si era venta a crédito
+      if (existing[0].payment_method === 'Crédito' && existing[0].customer_id) {
+        await connection.execute(
+          "UPDATE customers SET credit_limit = credit_limit + ? WHERE id = ?",
+          [existing[0].total, existing[0].customer_id]
         );
       }
 

@@ -12,5 +12,11 @@ contextBridge.exposeInMainWorld("api", {
   getSession: () => ipcRenderer.invoke('get-session'),
 
   // Logout: limpiar sesión en proceso principal
-  logout: () => ipcRenderer.invoke('logout')
+  logout: () => ipcRenderer.invoke('logout'),
+
+  // Abrir ventana de recibo
+  openReceipt: (data) => ipcRenderer.send('open-receipt', data),
+
+  // Abrir ventana de ticket de código de barras
+  openBarcodeTicket: (data) => ipcRenderer.send('open-barcode-ticket', data)
 });

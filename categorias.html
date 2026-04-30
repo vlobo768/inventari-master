@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Categorías - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=3">
   <style>
     body {
       flex-direction: column;
@@ -37,83 +37,12 @@
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .btn-nav:hover {
-      background: #00d2ff;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-    }
+    .actions { display: flex; gap: 10px; }
     .toolbar {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: flex-end;
       margin-bottom: 20px;
     }
-    .btn-add {
-      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    .btn-add:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
-    }
-    .table-container {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      color: #fff;
-      font-size: 14px;
-    }
-    th {
-      text-align: left;
-      padding: 15px;
-      background: rgba(255,255,255,0.1);
-      color: #00d2ff;
-      border-bottom: 2px solid rgba(255,255,255,0.1);
-    }
-    td {
-      padding: 12px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    tr:hover {
-      background: rgba(255,255,255,0.03);
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-action {
-      padding: 5px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    .btn-edit:hover { background: #3498db; border-color: #3498db; }
-    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
 
     /* Modals */
     .modal {
@@ -148,33 +77,40 @@
       color: #a0aec0;
     }
     .modal-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: end;
+    }
+    .modal-form .form-group {
       display: flex;
       flex-direction: column;
-      gap: 15px;
     }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    .form-group label {
+    .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      text-align: left;
     }
-    .form-group input, .form-group select {
-      padding: 10px;
-      border-radius: 6px;
+    .modal-form input, .modal-form select {
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(255,255,255,0.05);
       color: #fff;
       outline: none;
+      width: 100%;
+      box-sizing: border-box;
     }
     .modal-footer {
-      margin-top: 20px;
+      margin-top: 30px;
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 15px;
+      grid-column: span 2;
     }
+
+
     .btn-save {
       background: #2ecc71;
       color: #fff;
@@ -265,6 +201,19 @@
   </div>
 
   <script>
+    // RBAC check
+    const userStr = localStorage.getItem("currentUser");
+    if (!userStr) {
+      window.location.href = "index.html";
+    } else {
+      const user = JSON.parse(userStr);
+      const userLevel = user.user_level || user.level;
+      if (userLevel != 1 && userLevel != 2) {
+        alert("Acceso denegado: No tienes permisos para gestionar categorías.");
+        window.location.href = "dashboard.html";
+      }
+    }
+
     async function loadCategories() {
       const response = await window.api.apiCall('categories', 'getAllCategories');
       if (response.success) {
@@ -274,14 +223,19 @@
 
         cats.forEach(c => {
           const row = document.createElement('tr');
-          row.innerHTML = \`
-            <td>\${c.name}</td>
-            <td>\${c.parent_name || '<span style="color: #a0aec0">Raíz</span>'}</td>
+          
+          const userStr = localStorage.getItem("currentUser");
+          const user = userStr ? JSON.parse(userStr) : {};
+          const userLevel = user.user_level || user.level;
+
+          row.innerHTML = `
+            <td>${c.name}</td>
+            <td>${c.parent_name || '<span style="color: #a0aec0">Raíz</span>'}</td>
             <td class="actions">
-              <button class="btn-action btn-edit" onclick="editCategory(\${c.id})">Editar</button>
-              <button class="btn-action btn-delete" onclick="deleteCategory(\${c.id})">Eliminar</button>
+              <button class="btn-action btn-edit" onclick="editCategory(${c.id})">Editar</button>
+              ${userLevel == 1 ? `<button class="btn-action btn-delete" onclick="deleteCategory(${c.id})">Eliminar</button>` : ''}
             </td>
-          \`;
+          `;
           tbody.appendChild(row);
         });
       }
@@ -302,6 +256,15 @@
     }
 
     function openCategoryModal(catId = null) {
+      const userStr = localStorage.getItem("currentUser");
+      const user = userStr ? JSON.parse(userStr) : {};
+      const userLevel = user.user_level || user.level;
+
+      if (userLevel != 1 && userLevel != 2) {
+        alert("No tienes permisos para añadir o editar categorías.");
+        return;
+      }
+
       const modal = document.getElementById('catModal');
       const form = document.getElementById('catForm');
       const title = document.getElementById('modalTitle');
@@ -350,7 +313,7 @@
         closeCategoryModal();
         loadCategories();
       } else {
-        alert("Error: " + response.msg);
+        alert("Error: " + response.message);
       }
     };
 
@@ -360,7 +323,7 @@
         if (response.success) {
           loadCategories();
         } else {
-          alert("Error: " + response.msg);
+          alert("Error: " + response.message);
         }
       }
     }

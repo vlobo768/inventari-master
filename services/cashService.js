@@ -8,10 +8,11 @@ const CashService = {
    * Abrir sesión de caja
    */
   async openSession(userId, startBalance) {
-    const [result] = await db.execute(
-      "INSERT INTO cash_sessions (user_id, start_balance) VALUES (?, ?)",
-      [userId, startBalance || 0]
-    );
+    const CoreService = require('./core');
+    const result = await CoreService.agregar('cash_sessions', {
+      user_id: userId,
+      start_balance: startBalance || 0
+    });
     return { success: true, sessionId: result.insertId };
   },
 

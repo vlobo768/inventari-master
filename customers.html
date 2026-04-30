@@ -37,36 +37,8 @@
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .btn-nav:hover {
-      background: #00d2ff;
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 20px;
-    }
-    .search-box {
-      flex: 1;
-      display: flex;
-      gap: 10px;
-    }
+    .nav-buttons { display: flex; gap: 10px; }
+.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -116,20 +88,11 @@
     tr:hover {
       background: rgba(255,255,255,0.03);
     }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-action {
-      padding: 5px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
+    .actions { display: flex; gap: 10px; }
+.btn-action { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 11px; transition: all 0.2s; } .btn-edit:hover { background: #3498db; border-color: #3498db; } .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; } .btn-status:hover { background: #f39c12; border-color: #f39c12; }
+    .btn-action {-radius: 0; margin-left: -1px;}
+    
+    
     .btn-edit:hover { background: #3498db; border-color: #3498db; }
     .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
 
@@ -169,7 +132,8 @@
     .modal-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 20px;
+      align-items: end;
     }
     .modal-form .form-group {
       display: flex;
@@ -181,22 +145,27 @@
     .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      text-align: left;
     }
     .modal-form input, .modal-form select {
-      padding: 10px;
-      border-radius: 6px;
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(255,255,255,0.05);
       color: #fff;
       outline: none;
+      width: 100%;
+      box-sizing: border-box;
     }
     .modal-footer {
-      margin-top: 20px;
+      margin-top: 30px;
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 15px;
+      grid-column: span 2;
     }
+
     .btn-save {
       background: #2ecc71;
       color: #fff;
@@ -251,7 +220,7 @@
             <th>Nombre</th>
             <th>Correo</th>
             <th>Teléfono</th>
-            <th>Límite Crédito</th>
+            <th>Crédito Disponible</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -288,7 +257,7 @@
           <input type="text" id="custAddress">
         </div>
         <div class="form-group full">
-          <label>Límite de Crédito ($)</label>
+          <label>Crédito Disponible ($)</label>
           <input type="number" step="0.01" id="custCredit" value="0.00">
         </div>
         <div class="modal-footer full">
@@ -300,6 +269,19 @@
   </div>
 
   <script>
+    // RBAC check
+    const userStr = localStorage.getItem("currentUser");
+    if (!userStr) {
+      window.location.href = "index.html";
+    } else {
+      const user = JSON.parse(userStr);
+      const userLevel = user.user_level || user.level;
+      if (userLevel != 1 && userLevel != 2 && userLevel != 3) {
+        alert("Acceso denegado.");
+        window.location.href = "dashboard.html";
+      }
+    }
+
     async function loadCustomers() {
       const search = document.getElementById('searchCustomer').value;
       const response = await window.api.apiCall('customers', 'getAllCustomers', { search });
@@ -311,22 +293,36 @@
 
         customers.forEach(c => {
           const row = document.createElement('tr');
-          row.innerHTML = \`
-            <td>\${c.name}</td>
-            <td>\${c.email || 'N/A'}</td>
-            <td>\${c.phone || 'N/A'}</td>
-            <td>$\${c.credit_limit || 0}</td>
+          
+          const userStr = localStorage.getItem("currentUser");
+          const user = userStr ? JSON.parse(userStr) : {};
+          const userLevel = user.user_level || user.level;
+
+          row.innerHTML = `
+            <td>${c.name}</td>
+            <td>${c.email || 'N/A'}</td>
+            <td>${c.phone || 'N/A'}</td>
+            <td>$${c.credit_limit || 0}</td>
             <td class="actions">
-              <button class="btn-action btn-edit" onclick="editCustomer(\${c.id})">Editar</button>
-              <button class="btn-action btn-delete" onclick="deleteCustomer(\${c.id})">Eliminar</button>
+              <button class="btn-action btn-edit" onclick="editCustomer(${c.id})">Editar</button>
+              ${userLevel == 1 || userLevel == 2 ? `<button class="btn-action btn-delete" onclick="deleteCustomer(${c.id})">Eliminar</button>` : ''}
             </td>
-          \`;
+          `;
           tbody.appendChild(row);
         });
       }
     }
 
     function openCustomerModal(custId = null) {
+      const userStr = localStorage.getItem("currentUser");
+      const user = userStr ? JSON.parse(userStr) : {};
+      const userLevel = user.user_level || user.level;
+
+      if (userLevel != 1 && userLevel != 2 && userLevel != 3) {
+        alert("No tienes permisos para añadir o editar clientes.");
+        return;
+      }
+
       const modal = document.getElementById('customerModal');
       const form = document.getElementById('customerForm');
       const title = document.getElementById('modalTitle');
@@ -345,18 +341,15 @@
     }
 
     async function loadCustomerData(id) {
-      // Buscamos el cliente en la lista ya cargada o hacemos una llamada al servidor
-      const response = await window.api.apiCall('customers', 'getAllCustomers');
-      if (response.success) {
-        const c = response.data.find(item => item.id == id);
-        if (c) {
-          document.getElementById('customerId').value = c.id;
-          document.getElementById('custName').value = c.name;
-          document.getElementById('custEmail').value = c.email || '';
-          document.getElementById('custPhone').value = c.phone || '';
-          document.getElementById('custAddress').value = c.address || '';
-          document.getElementById('custCredit').value = c.credit_limit || 0;
-        }
+      const response = await window.api.apiCall('customers', 'getCustomerById', id);
+      if (response.success && response.data) {
+        const c = response.data;
+        document.getElementById('customerId').value = c.id;
+        document.getElementById('custName').value = c.name;
+        document.getElementById('custEmail').value = c.email || '';
+        document.getElementById('custPhone').value = c.phone || '';
+        document.getElementById('custAddress').value = c.address || '';
+        document.getElementById('custCredit').value = c.credit_limit || 0;
       }
     }
 
@@ -384,7 +377,7 @@
         closeCustomerModal();
         loadCustomers();
       } else {
-        alert("Error: " + response.msg);
+        alert("Error: " + response.message);
       }
     };
 
@@ -394,7 +387,7 @@
         if (response.success) {
           loadCustomers();
         } else {
-          alert("Error al eliminar");
+          alert("Error: " + response.message);
         }
       }
     }

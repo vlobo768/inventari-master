@@ -16,6 +16,30 @@ const CoreService = {
   },
 
   /**
+   * Generic Add (Insert) function
+   * @param {string} table - The table name
+   * @param {object} data - Object containing column: value pairs
+   * @param {object} [connection] - Optional db connection for transactions
+   */
+  async agregar(table, data, connection = null) {
+    const keys = Object.keys(data);
+    const values = Object.values(data);
+    const placeholders = keys.map(() => '?').join(', ');
+    const columns = keys.join(', ');
+
+    const sql = `INSERT INTO ${table} (${columns}) VALUES (${placeholders})`;
+    
+    let result;
+    if (connection) {
+      [result] = await connection.execute(sql, values);
+    } else {
+      [result] = await db.execute(sql, values);
+    }
+    
+    return { success: true, insertId: result.insertId };
+  },
+
+  /**
    * Find a single record by ID
    */
   async findById(table, id) {

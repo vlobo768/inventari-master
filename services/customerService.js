@@ -4,6 +4,11 @@ const db = require('../database/db');
  * Profesional Customer Service
  */
 const CustomerService = {
+  async getCustomerById(id) {
+    const [rows] = await db.execute("SELECT * FROM customers WHERE id = ?", [id]);
+    return rows[0] || null;
+  },
+
   async getAllCustomers(filters = {}) {
     const { search } = filters;
     let sql = `SELECT * FROM customers WHERE 1=1`;
@@ -22,10 +27,15 @@ const CustomerService = {
     const { name, phone, email, address, credit_limit } = data;
     if (!name) throw new Error("El nombre es obligatorio.");
 
-    const [result] = await db.execute(
-      "INSERT INTO customers (name, phone, email, address, credit_limit) VALUES (?, ?, ?, ?, ?)",
-      [name, phone || null, email || null, address || null, credit_limit || 0]
-    );
+    const CoreService = require('./core');
+    const result = await CoreService.agregar('customers', {
+      name,
+      phone: phone || null,
+      email: email || null,
+      address: address || null,
+      credit_limit: credit_limit || 0
+    });
+    
     return { success: true, id: result.insertId };
   },
 

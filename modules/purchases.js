@@ -31,8 +31,29 @@ async function getPurchaseDetails(purchaseId) {
   }
 }
 
+async function updatePurchase(data) {
+  try {
+    const { id, ...updateData } = data;
+    await PurchaseService.updatePurchase(id, updateData);
+    return { success: true, msg: "Compra actualizada correctamente" };
+  } catch (error) {
+    return { success: false, msg: error.message };
+  }
+}
+
+async function deletePurchase(id) {
+  try {
+    await PurchaseService.deletePurchase(id);
+    return { success: true, msg: "Compra eliminada y stock revertido" };
+  } catch (error) {
+    return { success: false, msg: error.message };
+  }
+}
+
 module.exports = {
   createPurchase,
   getAllPurchases,
-  getPurchaseDetails
+  getPurchaseDetails,
+  updatePurchase,
+  deletePurchase
 };
