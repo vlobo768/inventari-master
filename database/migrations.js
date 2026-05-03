@@ -33,7 +33,7 @@ async function performMigration() {
     // 0. Tablas Base
     await db.execute(`
         CREATE TABLE IF NOT EXISTS user_groups (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             group_level INT NOT NULL UNIQUE,
             group_name VARCHAR(50) NOT NULL,
             group_status TINYINT DEFAULT 1
@@ -42,7 +42,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(100) NOT NULL,
             username VARCHAR(50) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
@@ -57,7 +57,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS media (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_name VARCHAR(255),
             file_path VARCHAR(255),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -66,7 +66,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS settings (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             setting_key VARCHAR(50) NOT NULL UNIQUE,
             setting_value VARCHAR(255) NOT NULL,
             description TEXT
@@ -74,7 +74,7 @@ async function performMigration() {
     `);
 
     // Insertar configuraciones base por defecto si no existen
-    await db.execute(`INSERT IGNORE INTO settings (setting_key, setting_value, description) VALUES 
+    await db.execute(`INSERT OR IGNORE INTO settings (setting_key, setting_value, description) VALUES 
         ('bcv_rate', '1.00', 'Tasa de cambio del BCV a USD'),
         ('cleanup_mode', 'kardex_only', 'Modo de auto-limpieza: kardex_only o full_delete'),
         ('cleanup_days', '10', 'Días de retención de historial de ventas/kardex')
@@ -82,7 +82,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS categories (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(100) NOT NULL,
             parent_id INT DEFAULT NULL
         )
@@ -90,7 +90,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS products (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(150) NOT NULL,
             quantity DECIMAL(10,3) DEFAULT 0.000,
             buy_price DECIMAL(10,2) DEFAULT 0,
@@ -119,11 +119,14 @@ async function performMigration() {
     await safeAlter("ALTER TABLE products MODIFY COLUMN quantity DECIMAL(10,3) DEFAULT 0.000");
     await safeAlter("ALTER TABLE products MODIFY COLUMN min_stock DECIMAL(10,3) DEFAULT 0.000");
     await safeAlter("ALTER TABLE categories ADD COLUMN parent_id INT DEFAULT NULL");
+    await safeAlter("ALTER TABLE customers ADD COLUMN cedula VARCHAR(20)");
+    await safeAlter("ALTER TABLE suppliers ADD COLUMN cedula VARCHAR(20)");
+    await safeAlter("ALTER TABLE suppliers ADD COLUMN status TINYINT DEFAULT 1");
 
     // Tablas Relacionales
     await db.execute(`
         CREATE TABLE IF NOT EXISTS suppliers (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(100) NOT NULL,
             contact_name VARCHAR(100),
             phone VARCHAR(20),
@@ -135,9 +138,10 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS customers (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(100) NOT NULL,
             phone VARCHAR(20),
+            cedula VARCHAR(20),
             email VARCHAR(100),
             address TEXT,
             credit_limit DECIMAL(10,2) DEFAULT 0.00,
@@ -147,7 +151,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS purchases (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             supplier_id INT,
             user_id INT,
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -160,7 +164,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS purchase_items (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             purchase_id INT,
             product_id INT,
             qty DECIMAL(10,3),
@@ -173,7 +177,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS sales_header (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             customer_id INT,
             user_id INT,
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -187,7 +191,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS sales_items (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             sale_id INT,
             product_id INT,
             qty DECIMAL(10,3),
@@ -200,10 +204,10 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS inventory_movements (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             product_id INT,
             user_id INT,
-            type ENUM('IN', 'OUT', 'ADJUSTMENT'),
+            type VARCHAR(50),
             qty DECIMAL(10,3),
             reference VARCHAR(100),
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -214,7 +218,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS cash_sessions (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INT,
             start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             end_date TIMESTAMP NULL,
@@ -226,7 +230,7 @@ async function performMigration() {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS audit_log (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INT,
             action VARCHAR(100),
             table_name VARCHAR(50),
@@ -242,15 +246,56 @@ async function performMigration() {
     await safeAlter("ALTER TABLE purchase_items MODIFY COLUMN qty DECIMAL(10,3)");
     await safeAlter("ALTER TABLE sales_items MODIFY COLUMN qty DECIMAL(10,3)");
     await safeAlter("ALTER TABLE inventory_movements MODIFY COLUMN qty DECIMAL(10,3)");
+
+    // ✅ MEJORAS DE CRÉDITO CLIENTES
+    await safeAlter("ALTER TABLE customers ADD COLUMN debt DECIMAL(10,2) DEFAULT 0.00");
+    await safeAlter("ALTER TABLE sales_header ADD COLUMN pending_amount DECIMAL(10,2) DEFAULT 0.00");
+
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS customer_payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_id INT,
+            amount DECIMAL(10,2),
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            note TEXT,
+            FOREIGN KEY (customer_id) REFERENCES customers(id)
+        )
+    `);
+
+    // ✅ MEJORAS DE CRÉDITO PROVEEDORES
+    await safeAlter("ALTER TABLE suppliers ADD COLUMN debt DECIMAL(10,2) DEFAULT 0.00");
+    await safeAlter("ALTER TABLE purchases ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Contado'");
+    await safeAlter("ALTER TABLE purchases ADD COLUMN pending_amount DECIMAL(10,2) DEFAULT 0.00");
+
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS supplier_payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            supplier_id INT,
+            amount DECIMAL(10,2),
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            note TEXT,
+            FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+        )
+    `);
+
+    // ✅ MEJORA DE RASTREO DE ANULACIONES
+    await safeAlter("ALTER TABLE sales_header ADD COLUMN cancelled_at TIMESTAMP NULL");
+
+    // ✅ REPARACIÓN DE DISCREPANCIA SOLICITADA
+    // Reconectar ventas de crédito huérfanas que coincidan con la deuda de Gabriel
+    await db.execute(`
+        UPDATE sales_header 
+        SET customer_id = (SELECT id FROM customers WHERE name LIKE '%gabriel orejas%' LIMIT 1)
+        WHERE id = 91 AND customer_id IS NULL
+    `);
 }
 
 async function safeAlter(sql) {
     try {
         await db.execute(sql);
     } catch (err) {
-        if (err.errno !== 1060 && err.code !== 'ER_DUP_FIELDNAME') {
-            throw err;
-        }
+        // Ignorar errores de columnas duplicadas o alteraciones no soportadas por SQLite
+        // console.log(`[SafeAlter] Ignorado: ${sql} - ${err.message}`);
     }
 }
 

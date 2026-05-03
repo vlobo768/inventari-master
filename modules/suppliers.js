@@ -50,10 +50,28 @@ async function deleteSupplier(id) {
   }
 }
 
+async function getPurchaseHistory(supplierId) {
+  try {
+    return await SupplierService.getPurchaseHistory(supplierId);
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function addPayment(supplierId, amount, note, purchaseId) {
+  try {
+    return await SupplierService.addPayment(supplierId, amount, note, purchaseId);
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   getSupplierById,
   getAllSuppliers,
   addSupplier,
   updateSupplier,
-  deleteSupplier
+  deleteSupplier,
+  getPurchaseHistory,
+  addPayment
 };

@@ -40,9 +40,39 @@ async function getSessionHistory() {
   }
 }
 
+async function deleteSession(id) {
+  try {
+    const result = await CashService.deleteSession(id);
+    return { success: true, msg: "Sesión eliminada correctamente." };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function deleteFirstClosedSession() {
+  try {
+    const result = await CashService.deleteFirstClosedSession();
+    return { success: true, msg: "Sesión más reciente eliminada." };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function clearSessionHistory() {
+  try {
+    const result = await CashService.clearSessionHistory();
+    return { success: true, msg: `Se eliminaron ${result.affectedRows} registros del historial.` };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   openSession,
   closeSession,
   getActiveSession,
-  getSessionHistory
+  getSessionHistory,
+  deleteSession,
+  deleteFirstClosedSession,
+  clearSessionHistory
 };

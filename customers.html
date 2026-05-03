@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Clientes - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272107">
   <style>
     body {
       flex-direction: column;
@@ -12,6 +13,7 @@
       overflow-y: auto;
       height: auto;
     }
+
     .container {
       width: 100%;
       max-width: 1200px;
@@ -25,20 +27,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
     }
+
     .header h1 {
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons { display: flex; gap: 10px; }
-.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -48,116 +56,186 @@
       color: #fff;
       outline: none;
     }
+
     .search-box input:focus {
       border-color: #00d2ff;
     }
-    .btn-add {
-      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    .btn-add:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
-    }
+
+
     .table-container {
       overflow-x: auto;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       color: #fff;
       font-size: 14px;
     }
+
     th {
       text-align: left;
       padding: 15px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       color: #00d2ff;
-      border-bottom: 2px solid rgba(255,255,255,0.1);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     }
+
     td {
       padding: 12px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     tr:hover {
-      background: rgba(255,255,255,0.03);
+      background: rgba(255, 255, 255, 0.03);
     }
-    .actions { display: flex; gap: 10px; }
-.btn-action { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 11px; transition: all 0.2s; } .btn-edit:hover { background: #3498db; border-color: #3498db; } .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; } .btn-status:hover { background: #f39c12; border-color: #f39c12; }
-    .btn-action {-radius: 0; margin-left: -1px;}
-    
-    
-    .btn-edit:hover { background: #3498db; border-color: #3498db; }
-    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-pay { background: #48bb78; color: white; }
+    .btn-pay:hover { background: #38a169; }
+    .btn-history { background: #ecc94b; color: #1a202c; }
+    .btn-history:hover { background: #d69e2e; }
+
+    /* Historial Table */
+    .history-table {
+      width: 100%;
+      margin-top: 10px;
+      font-size: 12px;
+      border-collapse: collapse;
+    }
+    .history-table th { font-size: 11px; padding: 8px; }
+    .history-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .status-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .status-pending { background: rgba(246, 173, 85, 0.2); color: #f6ad55; }
+    .status-paid { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+
+    /* Modal wide for history */
+    .modal-content.wide {
+      width: 800px;
+      max-width: 95%;
+    }
+
+    .history-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #a0aec0;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    .tab-btn.active {
+      background: rgba(0, 210, 255, 0.2);
+      color: #00d2ff;
+    }
+
+    /* Modals */
+
+
+
+
+
+
 
     /* Modals */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
+    #paymentModal, #customerModal {
+      z-index: 1100;
+    }
+
     .modal-content {
       background: #1a2a3a;
       padding: 30px;
       border-radius: 20px;
       width: 500px;
       max-width: 90%;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: modalFadeIn 0.3s ease-out;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+
+    .modal-header h2 {
+      color: #00d2ff;
+      font-size: 20px;
+    }
+
     .close-modal {
       font-size: 24px;
       cursor: pointer;
       color: #a0aec0;
     }
+
     .modal-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: end;
     }
+
     .modal-form .form-group {
       display: flex;
       flex-direction: column;
     }
+
     .modal-form .form-group.full {
       grid-column: span 2;
     }
+
     .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
       margin-bottom: 8px;
       text-align: left;
     }
-    .modal-form input, .modal-form select {
+
+    .modal-form input,
+    .modal-form select {
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
       color: #fff;
       outline: none;
       width: 100%;
       box-sizing: border-box;
     }
+
     .modal-footer {
       margin-top: 30px;
       display: flex;
@@ -166,49 +244,54 @@
       grid-column: span 2;
     }
 
-    .btn-save {
-      background: #2ecc71;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+
+
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <div class="header">
       <h1>Gestión de Clientes</h1>
       <div class="nav-buttons">
-        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
-        <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
-        <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
+        <button id="btnToggleSelection" class="btn-nav"
+          style="background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%);"
+          onclick="toggleSelectionMode()">Seleccionar</button>
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
+        <button class="btn-nav" style="background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);"
+          onclick="window.location.href='ventas.html'">NUEVA VENTA</button>
       </div>
     </div>
 
     <div class="toolbar">
       <div class="search-box">
-        <input type="text" id="searchCustomer" placeholder="Buscar por nombre, teléfono o correo..." oninput="loadCustomers()">
+        <input type="text" id="searchCustomer" placeholder="Buscar por nombre, cédula o teléfono..."
+          oninput="loadCustomers()">
       </div>
       <button class="btn-add" onclick="openCustomerModal()">+ Nuevo Cliente</button>
     </div>
@@ -218,9 +301,10 @@
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Correo</th>
+            <th>Cédula</th>
             <th>Teléfono</th>
-            <th>Crédito Disponible</th>
+            <th>Límite Crédito</th>
+            <th>Deuda</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -245,8 +329,8 @@
           <input type="text" id="custName" required>
         </div>
         <div class="form-group">
-          <label>Correo Electrónico</label>
-          <input type="email" id="custEmail">
+          <label>Cédula de Identidad</label>
+          <input type="text" id="custCedula" placeholder="V-12345678">
         </div>
         <div class="form-group">
           <label>Teléfono</label>
@@ -257,7 +341,7 @@
           <input type="text" id="custAddress">
         </div>
         <div class="form-group full">
-          <label>Crédito Disponible ($)</label>
+          <label>Límite de Crédito ($)</label>
           <input type="number" step="0.01" id="custCredit" value="0.00">
         </div>
         <div class="modal-footer full">
@@ -267,7 +351,91 @@
       </form>
     </div>
   </div>
+  <!-- Modal Pago -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Registrar Pago / Abono</h2>
+        <span class="close-modal" onclick="closePaymentModal()">&times;</span>
+      </div>
+      <form id="paymentForm" class="modal-form">
+        <input type="hidden" id="payCustId">
+        <input type="hidden" id="paySaleId">
+        <div class="form-group full">
+          <label>Cliente</label>
+          <input type="text" id="payCustName" readonly>
+        </div>
+        <div class="form-group">
+          <label>Deuda Actual</label>
+          <input type="text" id="payCurrentDebt" readonly>
+        </div>
+        <div class="form-group">
+          <label>Monto a Abonar ($)</label>
+          <input type="number" step="0.01" id="payAmount" required>
+        </div>
+        <div class="form-group full">
+          <label>Nota / Referencia (Opcional)</label>
+          <input type="text" id="payNote" placeholder="Ej: Pago transferencia #123">
+        </div>
+        <div class="modal-footer full">
+          <button type="button" class="btn-cancel" onclick="closePaymentModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Confirmar Pago</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
+  <!-- Modal Historial -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content wide">
+      <div class="modal-header">
+        <h2 id="historyTitle">Historial de Crédito</h2>
+        <span class="close-modal" onclick="closeHistoryModal()">&times;</span>
+      </div>
+      
+      <div class="history-tabs">
+        <button id="tabSalesBtn" class="tab-btn active" onclick="switchHistoryTab('sales')">Ventas Pendientes</button>
+        <button id="tabPaymentsBtn" class="tab-btn" onclick="switchHistoryTab('payments')">Historial de Pagos</button>
+      </div>
+
+      <div id="historySales" class="tab-content">
+        <div class="table-container" style="max-height: 400px;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>ID Venta</th>
+                <th>Fecha</th>
+                <th>Productos</th>
+                <th>Total</th>
+                <th>Saldo</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="historySalesBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="historyPayments" class="tab-content" style="display:none;">
+        <div class="table-container" style="max-height: 400px;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Nota</th>
+              </tr>
+            </thead>
+            <tbody id="historyPaymentsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeHistoryModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
   <script>
     // RBAC check
     const userStr = localStorage.getItem("currentUser");
@@ -285,7 +453,7 @@
     async function loadCustomers() {
       const search = document.getElementById('searchCustomer').value;
       const response = await window.api.apiCall('customers', 'getAllCustomers', { search });
-      
+
       if (response.success) {
         const customers = response.data;
         const tbody = document.querySelector('#customersTable tbody');
@@ -293,17 +461,19 @@
 
         customers.forEach(c => {
           const row = document.createElement('tr');
-          
+
           const userStr = localStorage.getItem("currentUser");
           const user = userStr ? JSON.parse(userStr) : {};
           const userLevel = user.user_level || user.level;
 
           row.innerHTML = `
             <td>${c.name}</td>
-            <td>${c.email || 'N/A'}</td>
+            <td>${c.cedula || 'N/A'}</td>
             <td>${c.phone || 'N/A'}</td>
-            <td>$${c.credit_limit || 0}</td>
+            <td>$${parseFloat(c.credit_limit || 0).toFixed(2)}</td>
+            <td style="color: ${parseFloat(c.debt) > 0 ? '#f6ad55' : '#48bb78'}">$${parseFloat(c.debt || 0).toFixed(2)}</td>
             <td class="actions">
+              <button class="btn-action btn-history" onclick="openHistory(${c.id}, '${c.name}')">Historial</button>
               <button class="btn-action btn-edit" onclick="editCustomer(${c.id})">Editar</button>
               ${userLevel == 1 || userLevel == 2 ? `<button class="btn-action btn-delete" onclick="deleteCustomer(${c.id})">Eliminar</button>` : ''}
             </td>
@@ -326,7 +496,7 @@
       const modal = document.getElementById('customerModal');
       const form = document.getElementById('customerForm');
       const title = document.getElementById('modalTitle');
-      
+
       form.reset();
       document.getElementById('customerId').value = '';
 
@@ -336,7 +506,7 @@
       } else {
         title.innerText = 'Nuevo Cliente';
       }
-      
+
       modal.style.display = 'flex';
     }
 
@@ -346,7 +516,7 @@
         const c = response.data;
         document.getElementById('customerId').value = c.id;
         document.getElementById('custName').value = c.name;
-        document.getElementById('custEmail').value = c.email || '';
+        document.getElementById('custCedula').value = c.cedula || '';
         document.getElementById('custPhone').value = c.phone || '';
         document.getElementById('custAddress').value = c.address || '';
         document.getElementById('custCredit').value = c.credit_limit || 0;
@@ -355,6 +525,7 @@
 
     function closeCustomerModal() {
       document.getElementById('customerModal').style.display = 'none';
+      document.getElementById('customerForm').reset();
     }
 
     document.getElementById('customerForm').onsubmit = async (e) => {
@@ -362,7 +533,7 @@
       const id = document.getElementById('customerId').value;
       const data = {
         name: document.getElementById('custName').value,
-        email: document.getElementById('custEmail').value,
+        cedula: document.getElementById('custCedula').value,
         phone: document.getElementById('custPhone').value,
         address: document.getElementById('custAddress').value,
         credit_limit: parseFloat(document.getElementById('custCredit').value)
@@ -373,7 +544,6 @@
 
       const response = await window.api.apiCall('customers', method, payload);
       if (response.success) {
-        alert(id ? "Cliente actualizado" : "Cliente creado");
         closeCustomerModal();
         loadCustomers();
       } else {
@@ -397,10 +567,154 @@
       openCustomerModal(id);
     }
 
+    // ✅ GESTIÓN DE PAGOS Y ABONOS
+    function openPayment(id, name, debt, saleId = null) {
+      document.getElementById('payCustId').value = id;
+      document.getElementById('paySaleId').value = saleId || '';
+      document.getElementById('payCustName').value = name + (saleId ? ` (Venta #${saleId})` : '');
+      document.getElementById('payCurrentDebt').value = `$${parseFloat(debt).toFixed(2)}`;
+      document.getElementById('payAmount').value = '';
+      document.getElementById('payAmount').max = debt;
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    document.getElementById('paymentForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('payCustId').value;
+      const saleId = document.getElementById('paySaleId').value;
+      const amount = parseFloat(document.getElementById('payAmount').value);
+      const note = document.getElementById('payNote').value;
+
+      const response = await window.api.apiCall('customers', 'addPayment', parseInt(id), amount, note, saleId ? parseInt(saleId) : null);
+      if (response.success) {
+        alert("Pago registrado con éxito");
+        closePaymentModal();
+        await loadCustomers(); // Esperar a que cargue la tabla principal
+        
+        // ✅ ACTUALIZACIÓN DINÁMICA: Si el historial está abierto, refrescarlo también
+        const historyModal = document.getElementById('historyModal');
+        if (historyModal.style.display === 'flex' && window.currentHistoryId) {
+          const currentHistoryName = document.getElementById('historyTitle').innerText.replace('Historial: ', '');
+          await refreshHistory(window.currentHistoryId, currentHistoryName);
+        }
+      } else {
+        alert("Error: " + response.error);
+      }
+    };
+
+    // Función para refrescar el historial sin cerrar el modal
+    async function refreshHistory(id, name) {
+      const response = await window.api.apiCall('customers', 'getCreditHistory', id);
+      if (response.success) {
+        renderHistorySales(response.sales);
+        renderHistoryPayments(response.payments);
+      }
+    }
+
+    // ✅ GESTIÓN DE HISTORIAL
+    async function openHistory(id, name) {
+      window.currentHistoryId = id; // Guardar ID globalmente para refrescos posteriores
+      document.getElementById('historyTitle').innerText = `Historial: ${name}`;
+      const response = await window.api.apiCall('customers', 'getCreditHistory', id);
+      if (response.success) {
+        renderHistorySales(response.sales);
+        renderHistoryPayments(response.payments);
+        switchHistoryTab('sales');
+        document.getElementById('historyModal').style.display = 'flex';
+      } else {
+        alert("Error al cargar historial: " + response.error);
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').style.display = 'none';
+    }
+
+    async function switchHistoryTab(tab) {
+      document.getElementById('historySales').style.display = tab === 'sales' ? 'block' : 'none';
+      document.getElementById('historyPayments').style.display = tab === 'payments' ? 'block' : 'none';
+      
+      document.getElementById('tabSalesBtn').classList.toggle('active', tab === 'sales');
+      document.getElementById('tabPaymentsBtn').classList.toggle('active', tab === 'payments');
+
+      // ✅ ACTUALIZACIÓN AL HACER CLICK: Recargar datos para asegurar que estén frescos
+      const titleText = document.getElementById('historyTitle').innerText;
+      const customerName = titleText.replace('Historial: ', '');
+      // El ID no está fácilmente disponible aquí, lo buscaremos en el objeto global o lo extraeremos
+      // Para mayor robustez, guardaremos el currentHistoryId globalmente al abrir el historial
+      if (window.currentHistoryId) {
+        await refreshHistory(window.currentHistoryId, customerName);
+      }
+    }
+
+    function renderHistorySales(sales) {
+      const tbody = document.getElementById('historySalesBody');
+      tbody.innerHTML = '';
+      if (!sales || sales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay ventas a crédito pendientes.</td></tr>';
+        return;
+      }
+      sales.forEach(s => {
+        // Necesitamos el nombre del cliente para el modal de pago
+        const name = document.getElementById('historyTitle').innerText.replace('Historial: ', '');
+        const row = `<tr>
+          <td>#${s.id}</td>
+          <td>${new Date(s.date).toLocaleString()}</td>
+          <td>${s.products}</td>
+          <td>$${parseFloat(s.total).toFixed(2)}</td>
+          <td style="color: #f6ad55; font-weight: bold;">$${parseFloat(s.pending_amount).toFixed(2)}</td>
+          <td>
+            <button class="btn-action btn-pay" onclick="openPayment(${s.customer_id || 'null'}, '${name}', ${s.pending_amount}, ${s.id})">Abonar</button>
+          </td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function renderHistoryPayments(payments) {
+      const tbody = document.getElementById('historyPaymentsBody');
+      tbody.innerHTML = '';
+      if (!payments || payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No se han registrado pagos.</td></tr>';
+        return;
+      }
+      payments.forEach(p => {
+        const row = `<tr>
+          <td>${new Date(p.date).toLocaleString()}</td>
+          <td style="color: #48bb78; font-weight: bold;">$${parseFloat(p.amount).toFixed(2)}</td>
+          <td>${p.note || '---'}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    // ✅ FIX: Escape y click en backdrop para cerrar modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCustomerModal();
+        closePaymentModal();
+        closeHistoryModal();
+      }
+    });
+
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', (e) => {
+        if (e.target === m) {
+          closeCustomerModal();
+          closePaymentModal();
+          closeHistoryModal();
+        }
+      });
+    });
+
     window.onload = loadCustomers;
   </script>
 </body>
+
 </html>
 
-(End of file - total 308 lines)
 </content>

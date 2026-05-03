@@ -14,15 +14,15 @@ async function getDashboardData() {
     const [prodCount] = await db.query("SELECT COUNT(*) as total FROM products");
     counts.products = prodCount[0].total;
 
-    const [saleCount] = await db.query("SELECT COUNT(*) as total FROM sales_header");
+    const [saleCount] = await db.query("SELECT COUNT(*) as total FROM sales_header WHERE status != 'cancelled'");
     counts.sales = saleCount[0].total;
 
     const [catCount] = await db.query("SELECT COUNT(*) as total FROM categories");
     counts.categories = catCount[0].total;
 
-    // KPI: Ventas del día
+    // KPI: Ventas del día (excluyendo anuladas)
     const [todaySales] = await db.query(
-      "SELECT SUM(total) as total FROM sales_header WHERE DATE(date) = CURDATE()"
+      "SELECT SUM(total) as total FROM sales_header WHERE DATE(date) = CURDATE() AND status != 'cancelled'"
     );
     counts.todayRevenue = todaySales[0].total || 0;
 

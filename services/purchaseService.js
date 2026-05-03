@@ -9,7 +9,7 @@ const PurchaseService = {
    * Registrar una compra de mercancía y actualizar stock
    */
   async createPurchase(purchaseData) {
-    const { supplierId, userId, items, total } = purchaseData;
+    const { supplierId, userId, items, total, paymentMethod } = purchaseData;
 
     if (!items || items.length === 0) throw new Error("La compra debe tener al menos un producto.");
     if (!supplierId) throw new Error("Debe seleccionar un proveedor.");
@@ -24,9 +24,19 @@ const PurchaseService = {
       const headerResult = await CoreService.agregar('purchases', {
         supplier_id: supplierId,
         user_id: userId || null,
-        total: total
+        total: total,
+        payment_method: paymentMethod || 'Contado',
+        pending_amount: (paymentMethod === 'Crédito') ? total : 0.00
       }, connection);
       const purchaseId = headerResult.insertId;
+
+      // ✅ ACTUALIZAR DEUDA DEL PROVEEDOR SI ES CRÉDITO
+      if (paymentMethod === 'Crédito') {
+        await connection.execute(
+          "UPDATE suppliers SET debt = debt + ? WHERE id = ?",
+          [total, supplierId]
+        );
+      }
 
       // 2. Insertar Items y Actualizar Stock (tabla: purchase_items)
       for (const item of items) {
@@ -40,10 +50,10 @@ const PurchaseService = {
           total: item.quantity * item.price
         }, connection);
 
-        // Aumentar Stock
+        // Aumentar Stock y Actualizar Precios (Costo y Venta)
         await connection.execute(
-          "UPDATE products SET quantity = quantity + ? WHERE id = ?",
-          [item.quantity, item.id]
+          "UPDATE products SET quantity = quantity + ?, buy_price = ?, sale_price = ? WHERE id = ?",
+          [item.quantity, item.price, item.sale_price, item.id]
         );
 
         // Registrar en Kardex
@@ -72,7 +82,7 @@ const PurchaseService = {
   async getAllPurchases(filters = {}) {
     const { search } = filters;
     let sql = `
-      SELECT p.id, p.total, DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') as date,
+      SELECT p.id, p.total, DATE_FORMAT(p.date, '%Y-%m-%d %H:%i') as date,
              s.name as supplier_name,
              u.username as user_name
       FROM purchases p
@@ -87,7 +97,7 @@ const PurchaseService = {
       params.push(`%${search}%`, search);
     }
     
-    sql += " ORDER BY p.created_at DESC";
+    sql += " ORDER BY p.date DESC";
     
     const [rows] = await db.execute(sql, params);
     return rows;
@@ -100,7 +110,7 @@ const PurchaseService = {
     if (!purchaseId) throw new Error("ID de compra requerido");
     
     const [header] = await db.execute(`
-      SELECT p.id, p.total, DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') as date, 
+      SELECT p.id, p.total, DATE_FORMAT(p.date, '%Y-%m-%d %H:%i') as date, 
              s.name as supplier_name, u.username as user_name 
       FROM purchases p
       LEFT JOIN suppliers s ON p.supplier_id = s.id
@@ -141,7 +151,7 @@ const PurchaseService = {
   },
 
   /**
-   * Eliminar una compra y revertir el stock
+   * Eliminar una compra SIN revertir el stock (el stock permanece intacto)
    */
   async deletePurchase(purchaseId) {
     if (!purchaseId) throw new Error("ID de compra requerido.");
@@ -149,32 +159,25 @@ const PurchaseService = {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
-      
-      // 1. Obtener items para revertir stock
-      const [items] = await connection.execute(
-        "SELECT product_id, qty FROM purchase_items WHERE purchase_id = ?", 
-        [purchaseId]
-      );
-      
-      for (const item of items) {
-        // Restar el stock que entró por la compra
-        await connection.execute(
-          "UPDATE products SET quantity = quantity - ? WHERE id = ?",
-          [item.qty, item.product_id]
-        );
-        // Borrar movimiento de Kardex relacionado (opcional, o marcar como revertido)
-        await connection.execute(
-          "DELETE FROM inventory_movements WHERE product_id = ? AND reference = ?",
-          [item.product_id, `Compra #${purchaseId}`]
-        );
-      }
-      
-      // 2. Borrar items de compra
+
+      // 0. Obtener info de la compra antes de borrar
+      const [existing] = await connection.execute("SELECT * FROM purchases WHERE id = ?", [purchaseId]);
+      if (existing.length === 0) throw new Error("Compra no encontrada.");
+
+      // 1. Borrar items de compra
       await connection.execute("DELETE FROM purchase_items WHERE purchase_id = ?", [purchaseId]);
       
-      // 3. Borrar cabecera de compra
+      // 2. Borrar cabecera de compra
       const [result] = await connection.execute("DELETE FROM purchases WHERE id = ?", [purchaseId]);
       
+      // 3. Restaurar deuda del proveedor si era crédito
+      if (existing[0].payment_method === 'Crédito' && existing[0].supplier_id) {
+        await connection.execute(
+          "UPDATE suppliers SET debt = debt - ? WHERE id = ?",
+          [existing[0].total, existing[0].supplier_id]
+        );
+      }
+
       await connection.commit();
       return { success: true, affectedRows: result.affectedRows };
     } catch (error) {

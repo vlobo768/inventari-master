@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Historial de Ventas - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css?v=6">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272108">
   <style>
     body {
       flex-direction: column;
@@ -12,6 +13,7 @@
       overflow-y: auto;
       height: auto;
     }
+
     .container {
       width: 100%;
       max-width: 1200px;
@@ -25,96 +27,245 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
     }
+
     .header h1 {
       color: #00d2ff;
       font-size: 24px;
     }
-    .actions { display: flex; gap: 10px; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
 
     /* Modals */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1a2a3a;
       padding: 30px;
       border-radius: 20px;
       width: 700px;
       max-width: 90%;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: modalFadeIn 0.3s ease-out;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+
+    .modal-header h2 {
+      color: #00d2ff;
+      font-size: 20px;
+    }
+
     .close-modal {
       font-size: 24px;
       cursor: pointer;
       color: #a0aec0;
     }
+
     .detail-info {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
       margin-bottom: 20px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       padding: 15px;
       border-radius: 10px;
     }
+
     .detail-item span {
       color: #a0aec0;
       font-size: 13px;
       display: block;
     }
+
     .detail-item strong {
       color: #fff;
       font-size: 15px;
     }
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Bulk Actions Bar */
+    .bulk-actions-bar {
+      display: none;
+      background: rgba(0, 210, 255, 0.1);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .bulk-info {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .bulk-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .col-check {
+      display: none;
+      width: 40px;
+      text-align: center;
+    }
+
+    .selection-mode .col-check {
+      display: table-cell;
+    }
+
+    /* Custom Checkbox */
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #00d2ff;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      text-align: center;
+      min-width: 90px;
+      backdrop-filter: blur(5px);
+    }
+
+    .status-completed {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      box-shadow: 0 0 10px rgba(46, 204, 113, 0.1);
+    }
+
+    .status-pending {
+      background: rgba(243, 156, 18, 0.15);
+      color: #f39c12;
+      border: 1px solid rgba(243, 156, 18, 0.3);
+      box-shadow: 0 0 10px rgba(243, 156, 18, 0.1);
+    }
+
+    .status-cancelled {
+      background: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      box-shadow: 0 0 10px rgba(231, 76, 60, 0.1);
+    }
+
+    .btn-purge {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 5px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      text-transform: uppercase;
+    }
+
+    .btn-purge:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.2);
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <div class="header">
       <h1>Historial de Ventas</h1>
       <div class="nav-buttons">
-        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
-        <button class="btn-nav" onclick="window.location.href='ventas.html'">Nuevo POS</button>
+        <button id="btnToggleSelection" class="btn-nav"
+          style="background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%);"
+          onclick="toggleSelectionMode()">Seleccionar</button>
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
+        <button class="btn-nav" style="background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);"
+          onclick="window.location.href='ventas.html'">NUEVA VENTA</button>
       </div>
     </div>
 
     <div class="toolbar">
       <div class="search-box">
-        <input type="text" id="searchSale" placeholder="Buscar por ID de venta o cliente..." oninput="loadSales()">
+        <input type="text" id="searchSale" placeholder="Buscar por ID, cliente o fecha (AAAA-MM-DD)..."
+          oninput="loadSales()">
+      </div>
+    </div>
+
+    <div id="bulkBar" class="bulk-actions-bar">
+      <div class="bulk-info">
+        <span id="selectedCount">0</span> ventas seleccionadas
+      </div>
+      <div class="bulk-btns">
+        <button class="btn-action btn-delete" style="padding: 10px 20px; font-size: 14px; background: #34495e;"
+          onclick="bulkCancelSales()">Anular Seleccionadas</button>
+        <button class="btn-action btn-delete" style="padding: 10px 20px; font-size: 14px; background: #e74c3c;"
+          onclick="bulkPurgeSales()">Borrar del Historial</button>
       </div>
     </div>
 
@@ -122,12 +273,14 @@
       <table id="salesTable">
         <thead>
           <tr>
+            <th class="col-check"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
             <th>ID Venta</th>
             <th>Cliente</th>
             <th>Fecha</th>
             <th>Vendedor</th>
             <th>Total</th>
             <th>Método</th>
+            <th>Detalles</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -170,39 +323,7 @@
   </div>
 
   <script>
-    async function loadSales() {
-      const search = document.getElementById('searchSale').value;
-      const response = await window.api.apiCall('sales', 'getAllSales', { search });
-      
-      if (response.success) {
-        const sales = response.data;
-        const tbody = document.querySelector('#salesTable tbody');
-        tbody.innerHTML = '';
 
-        sales.forEach(s => {
-          const userStr = localStorage.getItem("currentUser");
-          const user = userStr ? JSON.parse(userStr) : {};
-          const userLevel = user.user_level || user.level;
-
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>#${s.id}</td>
-            <td>${s.customer_name || 'Cliente General'}</td>
-            <td>${s.date}</td>
-            <td>${s.seller_name || 'Sist.'}</td>
-            <td>$${s.total}</td>
-            <td>${s.payment_method}</td>
-            <td class="actions">
-              <button class="btn-action btn-status" onclick="viewSaleDetails(${s.id})">Detalle</button>
-              ${s.status !== 'cancelled' && userLevel == 1 
-                ? `<button class="btn-action btn-delete" onclick="cancelSale(${s.id})">Anular</button>` 
-                : (s.status === 'cancelled' ? '<span style="color:#e74c3c; font-size:12px; font-weight:bold;">Anulada</span>' : '')}
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-    }
 
     async function cancelSale(id) {
       if (confirm("¿Estás seguro de anular esta venta? Esto restaurará el stock de los productos.")) {
@@ -216,11 +337,23 @@
       }
     }
 
+    async function purgeSale(id) {
+      if (confirm("¿Estás seguro de que desea borrar el historial de compra?")) {
+        const response = await window.api.apiCall('sales', 'purgeSale', id);
+        if (response.success) {
+          alert("Registro de venta eliminado definitivamente.");
+          loadSales();
+        } else {
+          alert("Error al eliminar registro: " + (response.msg || response.error || "Desconocido"));
+        }
+      }
+    }
+
     async function viewSaleDetails(id) {
       const response = await window.api.apiCall('sales', 'getSaleDetails', id);
       if (response.success) {
         const { header, items } = response.data;
-        
+
         // ✅ FIX: Mostrar nombre del cliente/vendedor, no el ID crudo
         const headerDiv = document.getElementById('saleHeaderDetails');
         headerDiv.innerHTML = `
@@ -229,7 +362,11 @@
           <div class="detail-item"><span>Cliente:</span><strong>${header.customer_name || 'Cliente General'}</strong></div>
           <div class="detail-item"><span>Vendedor:</span><strong>${header.seller_name || 'Sistema'}</strong></div>
           <div class="detail-item"><span>Método de Pago:</span><strong>${header.payment_method || 'N/A'}</strong></div>
-          <div class="detail-item"><span>Estado:</span><strong style="color: ${header.status === 'cancelled' ? '#e74c3c' : '#2ecc71'}">${header.status === 'cancelled' ? '❌ Anulada' : '✅ Completada'}</strong></div>
+          <div class="detail-item"><span>Estado:</span>
+            <strong style="color: ${header.status === 'cancelled' ? '#e74c3c' : (parseFloat(header.pending_amount) > 0 ? '#f39c12' : '#2ecc71')}">
+              ${header.status === 'cancelled' ? '❌ Anulada' : (parseFloat(header.pending_amount) > 0 ? '⏳ Pendiente' : '✅ Completada')}
+            </strong>
+          </div>
         `;
 
         // Llenar items
@@ -255,10 +392,162 @@
       document.getElementById('detailModal').style.display = 'none';
     }
 
+    // --- SELECTION MODE LOGIC ---
+    let selectionMode = false;
+    let selectedSales = new Set();
+
+    function toggleSelectionMode() {
+      selectionMode = !selectionMode;
+      const container = document.querySelector('.container');
+      const btn = document.getElementById('btnToggleSelection');
+      const bulkBar = document.getElementById('bulkBar');
+
+      if (selectionMode) {
+        container.classList.add('selection-mode');
+        btn.innerText = 'Cancelar Selección';
+        btn.style.background = 'linear-gradient(90deg, #e74c3c 0%, #c0392b 100%)';
+        bulkBar.style.display = 'flex';
+      } else {
+        container.classList.remove('selection-mode');
+        btn.innerText = 'Seleccionar';
+        btn.style.background = 'linear-gradient(90deg, #34495e 0%, #2c3e50 100%)';
+        bulkBar.style.display = 'none';
+        selectedSales.clear();
+        updateSelectedCount();
+        document.getElementById('selectAll').checked = false;
+      }
+      loadSales();
+    }
+
+    function toggleSelectAll(master) {
+      const checkboxes = document.querySelectorAll('.sale-check');
+      checkboxes.forEach(cb => {
+        cb.checked = master.checked;
+        const id = parseInt(cb.getAttribute('data-id'));
+        if (master.checked) selectedSales.add(id);
+        else selectedSales.delete(id);
+      });
+      updateSelectedCount();
+    }
+
+    function handleRowCheck(cb, id) {
+      if (cb.checked) selectedSales.add(id);
+      else {
+        selectedSales.delete(id);
+        document.getElementById('selectAll').checked = false;
+      }
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selectedCount').innerText = selectedSales.size;
+    }
+
+    async function bulkCancelSales() {
+      if (selectedSales.size === 0) return;
+
+      if (confirm(`¿Estás seguro de anular las ${selectedSales.size} ventas seleccionadas? Esta acción no se puede deshacer.`)) {
+        const ids = Array.from(selectedSales);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const id of ids) {
+          try {
+            const response = await window.api.apiCall('sales', 'deleteSale', id);
+            if (response.success) successCount++;
+            else failCount++;
+          } catch (e) { failCount++; }
+        }
+
+        alert(`Proceso completado.\nÉxito: ${successCount}\nFallidos: ${failCount}`);
+        selectedSales.clear();
+        updateSelectedCount();
+        if (selectionMode) toggleSelectionMode();
+        else loadSales();
+      }
+    }
+
+    async function bulkPurgeSales() {
+      if (selectedSales.size === 0) return;
+
+      if (confirm(`¿Estás seguro de que desea borrar el historial de compra de las ${selectedSales.size} ventas seleccionadas? Esta acción NO se puede deshacer.`)) {
+        const ids = Array.from(selectedSales);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const id of ids) {
+          try {
+            const response = await window.api.apiCall('sales', 'purgeSale', id);
+            if (response.success) successCount++;
+            else failCount++;
+          } catch (e) { failCount++; }
+        }
+
+        alert(`Proceso de limpieza completado.\nÉxito: ${successCount}\nFallidos (pueden no estar anuladas): ${failCount}`);
+        selectedSales.clear();
+        updateSelectedCount();
+        if (selectionMode) toggleSelectionMode();
+        else loadSales();
+      }
+    }
+
+    // Modify loadSales to render checkboxes
+    async function loadSales() {
+      const search = document.getElementById('searchSale').value;
+      const response = await window.api.apiCall('sales', 'getAllSales', { search });
+
+      if (response.success) {
+        const sales = response.data;
+        const tbody = document.querySelector('#salesTable tbody');
+        tbody.innerHTML = '';
+
+        sales.forEach(s => {
+          const userStr = localStorage.getItem("currentUser");
+          const user = userStr ? JSON.parse(userStr) : {};
+          const userLevel = user.user_level || user.level;
+
+          const row = document.createElement('tr');
+          const isSelected = selectedSales.has(s.id);
+
+          row.innerHTML = `
+            <td class="col-check">
+              <input type="checkbox" class="sale-check" data-id="${s.id}" ${isSelected ? 'checked' : ''} onchange="handleRowCheck(this, ${s.id})">
+            </td>
+            <td>#${s.id}</td>
+            <td>${s.customer_name || 'Cliente General'}</td>
+            <td>${s.date}</td>
+            <td>${s.seller_name || 'Sist.'}</td>
+            <td>$${s.total}</td>
+            <td>${s.payment_method}</td>
+            <td>
+              ${s.status === 'cancelled' 
+                ? '<span class="status-badge status-cancelled">Anulado</span>' 
+                : (parseFloat(s.pending_amount) > 0 
+                  ? '<span class="status-badge status-pending">Pendiente</span>' 
+                  : '<span class="status-badge status-completed">Completado</span>'
+                )
+              }
+            </td>
+            <td class="actions">
+              ${s.status !== 'cancelled' 
+                ? `
+                  <button class="btn-action btn-status" onclick="viewSaleDetails(${s.id})">Detalle</button>
+                  <button class="btn-action btn-delete" onclick="cancelSale(${s.id})">Anular</button>
+                  <button class="btn-purge" onclick="purgeSale(${s.id})">Borrar</button>
+                `
+                : `<button class="btn-purge" onclick="purgeSale(${s.id})">Borrar</button>`
+              }
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
     window.onload = loadSales;
   </script>
 </body>
+
 </html>
 
-(End of file - total 221 lines)
 </content>

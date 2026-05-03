@@ -18,5 +18,10 @@ contextBridge.exposeInMainWorld("api", {
   openReceipt: (data) => ipcRenderer.send('open-receipt', data),
 
   // Abrir ventana de ticket de código de barras
-  openBarcodeTicket: (data) => ipcRenderer.send('open-barcode-ticket', data)
+  openBarcodeTicket: (data) => ipcRenderer.send('open-barcode-ticket', data),
+
+  // Licenciamiento
+  getMachineId: () => ipcRenderer.invoke('get-machine-id'),
+  activateLicense: (key) => ipcRenderer.invoke('activate-license', key),
+  getLicenseStatus: () => ipcRenderer.invoke('get-license-status')
 });

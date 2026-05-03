@@ -100,6 +100,15 @@ async function searchProduct(title) {
   }
 }
 
+async function purgeSale(saleId) {
+  try {
+    await SaleService.purgeSale(saleId);
+    return { success: true, msg: "Registro de venta eliminado definitivamente." };
+  } catch (error) {
+    return { success: false, msg: error.message };
+  }
+}
+
 module.exports = {
   addSale,
   getAllSales,
@@ -108,6 +117,7 @@ module.exports = {
   getSaleDetails,
   updateSale,
   deleteSale,
+  purgeSale,
   getAnalytics,
   searchProduct
 };

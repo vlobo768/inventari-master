@@ -67,7 +67,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-.form-group input {
+.form-group input, .form-group select {
   padding: 12px 15px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -76,13 +76,14 @@ body {
   font-size: 15px;
   transition: all 0.3s ease;
   outline: none;
+  width: 100%;
 }
 
 .form-group input::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }
 
-.form-group input:focus {
+.form-group input:focus, .form-group select:focus {
   border-color: #00d2ff;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
@@ -134,25 +135,91 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-  }
 }
 
 /* ====== BOTONES COMUNES DE LA APP ====== */
-.btn-nav { 
-  background: rgba(255,255,255,0.1); 
-  color: #fff; 
-  border: 1px solid rgba(255,255,255,0.2); 
-  padding: 8px 16px; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  font-size: 13px; 
+.btn-nav, .btn-add, .btn-save, .btn-cancel, .btn-pay, .btn-action, .logout-btn {
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
-  transition: all 0.3s ease; 
-} 
-.btn-nav:hover { 
-  background: #00d2ff; 
-  color: #000; 
-  box-shadow: 0 0 15px rgba(0, 210, 255, 0.6); 
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-nav:hover, .btn-add:hover, .btn-save:hover, .btn-cancel:hover, .btn-pay:hover, .btn-action:hover, .logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);
+  filter: brightness(1.1);
+}
+
+.btn-nav:active, .btn-add:active, .btn-save:active, .btn-cancel:active, .btn-pay:active, .btn-action:active, .logout-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 5px 10px rgba(0, 210, 255, 0.3);
+}
+
+/* Modificadores específicos si necesitan forzar el ancho */
+.btn-pay {
+  width: 100%;
+}
+
+/* Modificadores de color sin romper la estructura */
+.logout-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+}
+.logout-btn:hover {
+  box-shadow: 0 10px 20px rgba(231, 76, 60, 0.4) !important;
+}
+
+.btn-success {
+  background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%) !important;
+}
+.btn-success:hover {
+  box-shadow: 0 10px 20px rgba(46, 204, 113, 0.4) !important;
+}
+
+/* Acciones en Tablas (Kardex, Editar, Eliminar) - Un poco menos de padding para no romper la tabla pero mismo estilo */
+.btn-action { 
+  padding: 10px 14px; 
+  font-size: 14px; 
+  margin-right: 5px;
+}
+
+/* Control de Cantidad en POS */
+.qty-btn {
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  color: #ffffff;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+.qty-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 210, 255, 0.6);
+}
+
+/* Cerrar Modal (X) */
+.close-modal {
+  font-size: 24px;
+  cursor: pointer;
+  color: #a0aec0;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+.close-modal:hover {
+  color: #e74c3c;
+  transform: translateY(-2px) scale(1.1);
+  text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
 }
 
 /* ====== BUSCADORES ====== */
@@ -238,4 +305,41 @@ td {
 }
 tr:hover {
   background: rgba(255,255,255,0.03);
+}
+
+/* ====== SELECTS PREMIUM ====== */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 10px 40px 10px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+select:focus {
+  border-color: #00d2ff;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}
+
+select option {
+  background-color: #1a2a3a;
+  color: #fff;
+  padding: 10px;
+}
+
+select option:checked {
+  background-color: #3b82f6;
+  color: #fff;
 }

@@ -15,7 +15,7 @@ async function ensureDefaultUsers() {
 
         for (const role of roles) {
             await db.execute(
-                "INSERT IGNORE INTO user_groups (group_level, group_name, group_status) VALUES (?, ?, ?)",
+                "INSERT OR IGNORE INTO user_groups (group_level, group_name, group_status) VALUES (?, ?, ?)",
                 [role.level, role.name, role.status]
             );
         }

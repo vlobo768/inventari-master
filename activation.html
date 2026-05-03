@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activación de Software</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #4f46e5;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: var(--card);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; }
+        p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; }
+
+        .field { text-align: left; margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .machine-id-container {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #10b981;
+            margin-bottom: 1.5rem;
+            border: 1px dashed rgba(16, 185, 129, 0.3);
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.85rem;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { outline: none; border-color: var(--primary); }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover { background-color: #4338ca; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            margin-top: 0;
+            width: auto;
+        }
+        .copy-btn:hover { color: white; background: none; transform: none; }
+
+        #message {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .error { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .success { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Activación Requerida</h1>
+        <p>Para usar este software, por favor ingresa tu llave de producto. Si no tienes una, contacta al proveedor.</p>
+
+        <div class="field">
+            <label>ID de esta Computadora (Hardware ID)</label>
+            <div class="machine-id-container">
+                <span id="hwid">Cargando...</span>
+                <button class="copy-btn" onclick="copyId()">Copiar</button>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Llave de Producto</label>
+            <input type="text" id="licenseKey" placeholder="XXXXXX-XXXXXX-XXXXXX" spellcheck="false">
+        </div>
+
+        <button onclick="activate()">Activar Programa</button>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        async function loadHwId() {
+            const id = await window.api.getMachineId();
+            document.getElementById('hwid').innerText = id;
+        }
+
+        function copyId() {
+            const id = document.getElementById('hwid').innerText;
+            navigator.clipboard.writeText(id);
+            const btn = document.querySelector('.copy-btn');
+            btn.innerText = '¡Copiado!';
+            setTimeout(() => btn.innerText = 'Copiar', 2000);
+        }
+
+        async function activate() {
+            const key = document.getElementById('licenseKey').value.trim();
+            const msgDiv = document.getElementById('message');
+            
+            if (!key) {
+                showMessage('Por favor ingresa una llave.', 'error');
+                return;
+            }
+
+            const result = await window.api.activateLicense(key);
+            if (result.success) {
+                showMessage('¡Activación exitosa! Reiniciando...', 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showMessage(result.message || 'Error de activación.', 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerText = text;
+            msgDiv.className = type;
+            msgDiv.style.display = 'block';
+        }
+
+        loadHwId();
+    </script>
+</body>
+</html>

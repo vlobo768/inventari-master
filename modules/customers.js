@@ -50,11 +50,29 @@ async function deleteCustomer(id) {
   }
 }
 
+async function getCreditHistory(customerId) {
+  try {
+    return await CustomerService.getCreditHistory(customerId);
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function addPayment(customerId, amount, note, saleId) {
+  try {
+    return await CustomerService.addPayment(customerId, amount, note, saleId);
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 
 module.exports = {
   getCustomerById,
   getAllCustomers,
   addCustomer,
   updateCustomer,
-  deleteCustomer
+  deleteCustomer,
+  getCreditHistory,
+  addPayment
 };

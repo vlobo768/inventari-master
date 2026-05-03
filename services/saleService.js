@@ -23,7 +23,8 @@ const SaleService = {
         customer_id: customerId || null,
         user_id: userId || null,
         total: total,
-        payment_method: paymentMethod || 'Efectivo'
+        payment_method: paymentMethod || 'Efectivo',
+        pending_amount: (paymentMethod === 'Crédito') ? total : 0.00
       }, connection);
       const saleId = headerResult.insertId;
 
@@ -57,21 +58,23 @@ const SaleService = {
          }, connection);
        }
        
-       // ✅ VALIDACIÓN DE CRÉDITO: Descontar del crédito disponible
+       // ✅ VALIDACIÓN DE CRÉDITO MEJORADA: Usar deuda acumulada
        if (paymentMethod === 'Crédito' && customerId) {
          const [custRows] = await connection.execute(
-           "SELECT credit_limit FROM customers WHERE id = ?", 
+           "SELECT credit_limit, debt FROM customers WHERE id = ?", 
            [customerId]
          );
          if (custRows.length > 0) {
-           const availableCredit = parseFloat(custRows[0].credit_limit) || 0;
-           if (availableCredit < total) {
-             throw new Error(`Crédito disponible insuficiente. Crédito disponible: $${availableCredit.toFixed(2)}, Total venta: $${total}`);
+           const limit = parseFloat(custRows[0].credit_limit) || 0;
+           const currentDebt = parseFloat(custRows[0].debt) || 0;
+           
+           if (currentDebt + total > limit) {
+             throw new Error(`Límite de crédito excedido. Disponible: $${(limit - currentDebt).toFixed(2)}, Total venta: $${total}`);
            }
            
-           // Descontar el crédito disponible
+           // Aumentar la deuda del cliente
            await connection.execute(
-             "UPDATE customers SET credit_limit = credit_limit - ? WHERE id = ?",
+             "UPDATE customers SET debt = debt + ? WHERE id = ?",
              [total, customerId]
            );
          } else {
@@ -96,7 +99,7 @@ const SaleService = {
   async getAllSales(filters = {}) {
     const { search, startDate, endDate } = filters;
     let sql = `
-      SELECT s.id, s.total, s.date, s.payment_method, s.status,
+      SELECT s.id, s.total, s.date, s.payment_method, s.status, s.pending_amount,
              c.name as customer_name, u.username as seller_name
       FROM sales_header s
       LEFT JOIN customers c ON s.customer_id = c.id
@@ -106,8 +109,8 @@ const SaleService = {
     const params = [];
 
     if (search) {
-      sql += " AND (c.name LIKE ? OR s.id = ?)";
-      params.push(`%${search}%`, parseInt(search) || 0);
+      sql += " AND (c.name LIKE ? OR s.id = ? OR s.date LIKE ?)";
+      params.push(`%${search}%`, parseInt(search) || 0, `%${search}%`);
     }
 
     if (startDate && endDate) {
@@ -210,17 +213,17 @@ const SaleService = {
         );
       }
 
-      // Restaurar crédito disponible si era venta a crédito
+      // Restaurar crédito/deuda si era venta a crédito (evitando deuda negativa)
       if (existing[0].payment_method === 'Crédito' && existing[0].customer_id) {
         await connection.execute(
-          "UPDATE customers SET credit_limit = credit_limit + ? WHERE id = ?",
+          "UPDATE customers SET debt = MAX(0, COALESCE(debt, 0) - ?) WHERE id = ?",
           [existing[0].total, existing[0].customer_id]
         );
       }
 
-      // Marcar venta como cancelada
+      // Marcar venta como cancelada y registrar fecha de anulación
       await connection.execute(
-        "UPDATE sales_header SET status = 'cancelled' WHERE id = ?",
+        "UPDATE sales_header SET status = 'cancelled', cancelled_at = CURRENT_TIMESTAMP WHERE id = ?",
         [saleId]
       );
 
@@ -251,6 +254,35 @@ const SaleService = {
     }
     const [rows] = await db.execute(sql);
     return rows;
+  },
+
+  /**
+   * Eliminar definitivamente una venta que ya fue anulada
+   */
+  async purgeSale(saleId) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      // Verificar que exista
+      const [existing] = await connection.execute(
+        "SELECT status FROM sales_header WHERE id = ?", [saleId]
+      );
+      if (existing.length === 0) throw new Error("Venta no encontrada.");
+
+      // Borrar items primero (por si no hay CASCADE)
+      await connection.execute("DELETE FROM sales_items WHERE sale_id = ?", [saleId]);
+      // Borrar cabecera
+      await connection.execute("DELETE FROM sales_header WHERE id = ?", [saleId]);
+
+      await connection.commit();
+      return { success: true };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 };
 

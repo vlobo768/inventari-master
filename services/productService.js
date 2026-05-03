@@ -147,6 +147,23 @@ const ProductService = {
    */
   async deleteProduct(id) {
     if (!id) throw new Error("ID de producto requerido.");
+    
+    // Verificar si el producto tiene ventas asociadas
+    const [sales] = await db.execute("SELECT id FROM sales_items WHERE product_id = ? LIMIT 1", [id]);
+    if (sales.length > 0) {
+      throw new Error("No se puede eliminar este producto porque ya tiene ventas registradas en el historial.");
+    }
+
+    // Verificar si el producto tiene compras asociadas
+    const [purchases] = await db.execute("SELECT id FROM purchase_items WHERE product_id = ? LIMIT 1", [id]);
+    if (purchases.length > 0) {
+      throw new Error("No se puede eliminar este producto porque ya tiene compras registradas.");
+    }
+
+    // Eliminar movimientos del Kardex (siempre tiene uno inicial)
+    await db.execute("DELETE FROM inventory_movements WHERE product_id = ?", [id]);
+
+    // Eliminar el producto
     const [result] = await db.execute("DELETE FROM products WHERE id = ?", [id]);
     return { success: true, affectedRows: result.affectedRows };
   },

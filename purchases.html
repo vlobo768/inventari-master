@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Compras - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272108">
   <style>
     body {
       flex-direction: column;
@@ -12,6 +13,7 @@
       overflow-y: auto;
       height: auto;
     }
+
     .container {
       width: 100%;
       max-width: 1200px;
@@ -25,20 +27,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
     }
+
     .header h1 {
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons { display: flex; gap: 10px; }
-.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -48,182 +56,202 @@
       color: #fff;
       outline: none;
     }
+
     .search-box input:focus {
       border-color: #00d2ff;
     }
-    .btn-add {
-      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    .btn-add:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
-    }
+
+
     .table-container {
       overflow-x: auto;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       color: #fff;
       font-size: 14px;
     }
+
     th {
       text-align: left;
       padding: 15px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       color: #00d2ff;
-      border-bottom: 2px solid rgba(255,255,255,0.1);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     }
+
     td {
       padding: 12px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     tr:hover {
-      background: rgba(255,255,255,0.03);
+      background: rgba(255, 255, 255, 0.03);
     }
-    .actions { display: flex; gap: 10px; }
-.btn-action { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 11px; transition: all 0.2s; } .btn-edit:hover { background: #3498db; border-color: #3498db; } .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; } .btn-status:hover { background: #f39c12; border-color: #f39c12; }
-    .btn-action {-radius: 0; margin-left: -1px;}
-    
-    
-    .btn-detail:hover { background: #3498db; border-color: #3498db; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+
+
+
+
 
     /* Modals */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1a2a3a;
       padding: 30px;
       border-radius: 20px;
       width: 800px;
       max-width: 90%;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: modalFadeIn 0.3s ease-out;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+
+    .modal-header h2 {
+      color: #00d2ff;
+      font-size: 20px;
+    }
+
     .close-modal {
       font-size: 24px;
       cursor: pointer;
       color: #a0aec0;
     }
+
     .purchase-form {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: end;
     }
+
     .form-group {
       display: flex;
       flex-direction: column;
     }
+
     .form-group label {
       font-size: 12px;
       color: #cbd5e0;
       margin-bottom: 8px;
       text-align: left;
     }
-    .form-group select, .form-group input {
+
+    .form-group select,
+    .form-group input {
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
       color: #fff;
       outline: none;
       width: 100%;
       box-sizing: border-box;
     }
+
     .items-section {
-      background: rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.2);
       padding: 15px;
       border-radius: 10px;
     }
+
     .items-table {
       width: 100%;
       margin-bottom: 15px;
     }
+
     .items-table th {
       font-size: 12px;
       padding: 8px;
     }
+
     .items-table td {
       padding: 5px;
     }
+
     .item-input {
       width: 100%;
       padding: 5px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       border-radius: 4px;
     }
+
     .modal-footer {
       display: flex;
       justify-content: flex-end;
       gap: 15px;
       margin-top: 30px;
     }
-    .btn-save {
-      background: #2ecc71;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+
+
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <div class="header">
       <h1>Gestión de Compras (Entradas)</h1>
       <div class="nav-buttons">
-        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
         <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
       </div>
     </div>
@@ -261,7 +289,8 @@
         <h2>Detalle de Compra</h2>
         <span class="close-modal" onclick="closePurchaseDetailModal()">&#x2715;</span>
       </div>
-      <div id="purchaseDetailHeader" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div id="purchaseDetailHeader"
+        style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <!-- Cabecera -->
       </div>
       <div class="table-container">
@@ -292,6 +321,7 @@
         <h2>Nueva Orden de Compra</h2>
         <span class="close-modal" onclick="closePurchaseModal()">&times;</span>
       </div>
+      <datalist id="productListSource"></datalist>
       <form id="purchaseForm" class="purchase-form">
         <div class="form-row">
           <div class="form-group">
@@ -304,6 +334,13 @@
             <label>Fecha</label>
             <input type="date" id="purchaseDate" required>
           </div>
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <select id="purchasePaymentMethod" required>
+              <option value="Contado">Contado</option>
+              <option value="Crédito">Crédito</option>
+            </select>
+          </div>
         </div>
 
         <div class="items-section">
@@ -314,6 +351,7 @@
                 <th>Producto</th>
                 <th>Cantidad</th>
                 <th>Precio Costo</th>
+                <th>Precio Venta</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -321,7 +359,7 @@
               <!-- Items dinámicos -->
             </tbody>
           </table>
-          <button type="button" class="btn-nav" style="width: 100%;" onclick="addItemRow()">+ Agregar Producto</button>
+          <button type="button" class="btn-nav" onclick="addItemRow()">+ Agregar Producto</button>
         </div>
 
         <div class="modal-footer">
@@ -354,7 +392,7 @@
     async function loadPurchases() {
       const search = document.getElementById('searchPurchase').value;
       const response = await window.api.apiCall('purchases', 'getAllPurchases', { search });
-      
+
       if (response.success) {
         const purchases = response.data;
         const tbody = document.querySelector('#purchasesTable tbody');
@@ -362,7 +400,7 @@
 
         purchases.forEach(p => {
           const row = document.createElement('tr');
-          
+
           const userStr = localStorage.getItem("currentUser");
           const user = userStr ? JSON.parse(userStr) : {};
           const userLevel = user.user_level || user.level;
@@ -375,7 +413,7 @@
             <td>$${p.total}</td>
             <td class="actions">
               <button class="btn-action btn-detail" onclick="viewPurchaseDetails(${p.id})">Detalle</button>
-              ${userLevel == 1 ? `<button class="btn-action btn-delete" style="color: #e74c3c; border-color: #e74c3c;" onclick="deletePurchase(${p.id})">Eliminar</button>` : ''}
+              ${userLevel == 1 ? `<button class="btn-action btn-delete" onclick="deletePurchase(${p.id})">Eliminar</button>` : ''}
             </td>
           `;
           tbody.appendChild(row);
@@ -384,7 +422,7 @@
     }
 
     async function deletePurchase(id) {
-      if (confirm("¿Estás seguro de eliminar esta compra? Esto revertirá el stock de los productos asociados.")) {
+      if (confirm("¿Estás seguro de eliminar esta compra? El registro se borrará pero el stock de los productos permanecerá intacto.")) {
         const response = await window.api.apiCall('purchases', 'deletePurchase', id);
         if (response.success) {
           alert("Compra eliminada correctamente.");
@@ -416,27 +454,43 @@
     }
 
     function addItemRow() {
-      const products = window.cachedProducts || [];
       const tbody = document.getElementById('purchaseItemsTbody');
       const rowId = Date.now();
-      
+
       const row = document.createElement('tr');
       row.id = `row-${rowId}`;
-      
-      let productOptions = products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.quantity})</option>`).join('');
-      
+
       row.innerHTML = `
         <td>
-          <select class="item-prod" onchange="updateRowTotal(${rowId})" required>
-            <option value="">Seleccionar...</option>
-            ${productOptions}
-          </select>
+          <input type="text" list="productListSource" class="item-prod-input" 
+            oninput="updateRowDetails(${rowId})" 
+            placeholder="Buscar producto..." 
+            style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; outline: none;" 
+            required>
         </td>
         <td><input type="number" class="item-qty" value="1" min="1" oninput="updateRowTotal(${rowId})" required></td>
-        <td><input type="number" class="item-price" step="0.01" value="0.00" oninput="updateRowTotal(${rowId})" required></td>
+        <td><input type="number" class="item-price" step="0.01" value="0.00" oninput="updateRowTotal(${rowId})" required title="Precio de Costo"></td>
+        <td><input type="number" class="item-sale-price" step="0.01" value="0.00" required title="Nuevo precio de venta"></td>
         <td><button class="btn-action btn-delete" onclick="removeRow(${rowId})">X</button></td>
       `;
       tbody.appendChild(row);
+    }
+
+    function updateRowDetails(id) {
+      const row = document.getElementById(`row-${id}`);
+      const inputVal = row.querySelector('.item-prod-input').value;
+
+      // Buscar el producto por la etiqueta del datalist
+      const product = (window.cachedProducts || []).find(p =>
+        `${p.name} [SKU: ${p.sku || 'N/A'}]` === inputVal
+      );
+
+      if (product) {
+        // Al encontrar match, auto-llenar los precios actuales
+        row.querySelector('.item-price').value = product.buy_price || 0;
+        row.querySelector('.item-sale-price').value = product.sale_price || 0;
+      }
+      calculateTotal();
     }
 
     function removeRow(id) {
@@ -477,19 +531,29 @@
 
     function closePurchaseModal() {
       document.getElementById('purchaseModal').style.display = 'none';
+      document.getElementById('purchaseItemsTbody').innerHTML = '';
     }
 
     document.getElementById('purchaseForm').onsubmit = async (e) => {
       e.preventDefault();
-      
+
       const items = [];
       const rows = document.querySelectorAll('#purchaseItemsTbody tr');
-      
+
       for (const row of rows) {
+        const inputVal = row.querySelector('.item-prod-input').value;
+        const product = (window.cachedProducts || []).find(p => `${p.name} [SKU: ${p.sku || 'N/A'}]` === inputVal);
+
+        if (!product) {
+          alert("Uno de los productos seleccionados no es válido.");
+          return;
+        }
+
         items.push({
-          id: parseInt(row.querySelector('.item-prod').value),
+          id: product.id,
           quantity: parseInt(row.querySelector('.item-qty').value),
-          price: parseFloat(row.querySelector('.item-price').value)
+          price: parseFloat(row.querySelector('.item-price').value),
+          sale_price: parseFloat(row.querySelector('.item-sale-price').value)
         });
       }
 
@@ -497,14 +561,35 @@
         supplierId: parseInt(document.getElementById('purchaseSupplier').value),
         userId: JSON.parse(localStorage.getItem("currentUser")).id,
         total: parseFloat(document.getElementById('purchaseTotal').innerText.replace('$', '')),
+        paymentMethod: document.getElementById('purchasePaymentMethod').value,
         items: items
       };
 
       const response = await window.api.apiCall('purchases', 'createPurchase', data);
       if (response.success) {
-        alert("Compra registrada exitosamente. El stock ha sido actualizado.");
+        alert("Compra registrada exitosamente. El stock y los precios han sido actualizados.");
+
+        // Limpiar búsqueda para ver la nueva compra al principio
+        document.getElementById('searchPurchase').value = '';
+
         closePurchaseModal();
-        loadPurchases();
+
+        // Refrescar tabla de historial
+        await loadPurchases();
+
+        // RECARGAR Catálogo (Importante para ver los nuevos precios/stock en la siguiente compra)
+        window.cachedProducts = await loadProducts();
+
+        // Actualizar el datalist con los nuevos datos
+        const dl = document.getElementById('productListSource');
+        if (dl) {
+          dl.innerHTML = '';
+          window.cachedProducts.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `${p.name} [SKU: ${p.sku || 'N/A'}]`;
+            dl.appendChild(opt);
+          });
+        }
       } else {
         alert("Error: " + response.msg);
       }
@@ -550,14 +635,39 @@
       document.getElementById('purchaseDetailModal').style.display = 'none';
     }
 
+    // ✅ FIX: Escape y click en backdrop para cerrar modales
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closePurchaseModal();
+        closePurchaseDetailModal();
+      }
+    });
+    document.getElementById('purchaseModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('purchaseModal')) closePurchaseModal();
+    });
+    document.getElementById('purchaseDetailModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('purchaseDetailModal')) closePurchaseDetailModal();
+    });
+
     window.onload = async () => {
       window.cachedProducts = await loadProducts();
       await loadSuppliers();
       await loadPurchases();
+
+      // Preparar datalist de productos
+      const dl = document.getElementById('productListSource');
+      if (dl) {
+        dl.innerHTML = '';
+        window.cachedProducts.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = `${p.name} [SKU: ${p.sku || 'N/A'}]`;
+          dl.appendChild(opt);
+        });
+      }
     };
   </script>
 </body>
+
 </html>
 
-(End of file - total 338 lines)
 </content>

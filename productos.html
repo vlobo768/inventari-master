@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Productos - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css?v=3">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272109">
   <style>
     body {
       flex-direction: column;
@@ -12,6 +13,7 @@
       overflow-y: auto;
       height: auto;
     }
+
     .container {
       width: 100%;
       max-width: 1200px;
@@ -25,20 +27,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
     }
+
     .header h1 {
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons { display: flex; gap: 10px; }
-.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -48,36 +56,31 @@
       color: #fff;
       outline: none;
     }
+
     .search-box input:focus {
       border-color: #00d2ff;
     }
-    .btn-add {
-      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
+
+    .actions {
+      display: flex;
+      gap: 10px;
     }
-    .btn-add:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
-    }
-    .actions { display: flex; gap: 10px; }
 
     /* Modals */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1a2a3a;
       padding: 20px;
@@ -86,53 +89,59 @@
       max-width: 90%;
       max-height: 90vh;
       overflow-y: auto;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: modalFadeIn 0.3s ease-out;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
     }
-    .modal-header h2 { color: #00d2ff; font-size: 18px; margin: 0; }
+
+    .modal-header h2 {
+      color: #00d2ff;
+      font-size: 18px;
+      margin: 0;
+    }
+
     .close-modal {
       font-size: 24px;
       cursor: pointer;
       color: #a0aec0;
       line-height: 1;
     }
+
     .modal-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       align-items: end;
     }
+
     .modal-form .form-group {
       display: flex;
       flex-direction: column;
     }
+
     .modal-form .form-group.full {
       grid-column: span 2;
     }
+
     .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
       margin-bottom: 4px;
       text-align: left;
     }
-    .modal-form input, .modal-form select {
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05);
-      color: #fff;
-      font-size: 13px;
-      outline: none;
-      width: 100%;
-      box-sizing: border-box;
+
+    .modal-form input,
+    .modal-form select {
+      /* Estilos movidos a styles.css para consistencia */
     }
+
     .modal-footer {
       margin-top: 30px;
       display: flex;
@@ -141,49 +150,64 @@
       grid-column: span 2;
     }
 
-    .btn-save {
-      background: #2ecc71;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+
 
     /* Kardex Table */
     .kardex-container {
       margin-top: 20px;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.2);
       padding: 15px;
       border-radius: 10px;
     }
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Selection Mode Styles */
+    .selection-mode .col-check {
+      display: table-cell !important;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #00d2ff;
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <div class="header">
       <h1>Gestión de Productos</h1>
       <div class="nav-buttons">
-        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button id="btnToggleSelection" class="btn-nav"
+          style="background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%);"
+          onclick="toggleSelectionMode()">Seleccionar</button>
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
         <button class="btn-nav" onclick="window.location.href='categorias.html'">Categorías</button>
         <button class="btn-nav" onclick="window.location.href='users.html'">Usuarios</button>
         <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
@@ -192,19 +216,34 @@
 
     <div class="toolbar">
       <div class="search-box">
-        <input type="text" id="searchProduct" placeholder="Buscar por nombre, SKU o código de barras..." oninput="loadProducts()">
-        <select id="filterCategory" onchange="loadProducts()" style="padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); outline: none;">
+        <input type="text" id="searchProduct" placeholder="Buscar por nombre, código o código de barras..."
+          oninput="loadProducts()">
+        <select id="filterCategory" onchange="loadProducts()">
           <option value="">Todas las Categorías</option>
         </select>
       </div>
       <button class="btn-add" onclick="openProductModal()">+ Nuevo Producto</button>
     </div>
 
+    <!-- Barra de Acciones en Masa -->
+    <div id="bulkBar"
+      style="display: none; background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.3); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease-out;">
+      <div style="font-weight: 600; color: #fff;">
+        <span id="selectedCount">0</span> productos seleccionados
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-action btn-delete" style="padding: 10px 20px; font-size: 14px;"
+          onclick="bulkDeleteProducts()">Eliminar Seleccionados</button>
+      </div>
+    </div>
+
     <div class="table-container">
       <table id="productsTable">
         <thead>
           <tr>
-            <th>SKU</th>
+            <th class="col-check" style="display: none; width: 40px; text-align: center;"><input type="checkbox"
+                id="selectAll" onclick="toggleSelectAll(this)"></th>
+            <th>Código</th>
             <th>Nombre</th>
             <th>Categoría</th>
             <th>Precio Venta</th>
@@ -235,7 +274,7 @@
           <input type="text" id="prodName" required>
         </div>
         <div class="form-group">
-          <label>SKU (Referencia)</label>
+          <label>Código (Referencia)</label>
           <input type="text" id="prodSku">
         </div>
         <div class="form-group">
@@ -248,28 +287,73 @@
             <!-- Cargado dinámicamente -->
           </select>
         </div>
-        <div class="form-group">
-          <label>Precio Compra ($)</label>
-          <input type="number" step="0.01" id="prodBuyPrice" required oninput="calculateMarginOrPrice()">
+        <!-- Panel de Precios Profesional -->
+        <div class="form-group full"
+          style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+          <h3
+            style="font-size: 14px; color: #a0aec0; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+            💰 Calculadora de Precios y Margen
+          </h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label>Costo de Compra ($)</label>
+              <input type="number" step="0.01" id="prodBuyPrice" required
+                style="font-size: 18px; border-color: rgba(255,255,255,0.2);"
+                oninput="calculateMarginOrPrice('buyPrice')">
+            </div>
+
+            <div class="form-group">
+              <label>Margen (%)</label>
+              <input type="number" step="0.01" id="prodMargin" style="font-size: 18px; font-weight: bold;"
+                oninput="calculateMarginOrPrice('margin')">
+            </div>
+
+            <div class="form-group">
+              <label>Precio Venta ($)</label>
+              <input type="number" step="0.01" id="prodSalePrice" required
+                style="font-size: 18px; font-weight: bold; color: #00d2ff;" oninput="calculateMarginOrPrice('price')">
+            </div>
+          </div>
+
+          <!-- Botones de Preseteo Rápido -->
+          <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button type="button" onclick="setMarginPreset(10)"
+              style="flex: 1; padding: 5px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;">10%</button>
+            <button type="button" onclick="setMarginPreset(20)"
+              style="flex: 1; padding: 5px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;">20%</button>
+            <button type="button" onclick="setMarginPreset(30)"
+              style="flex: 1; padding: 5px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;">30%</button>
+            <button type="button" onclick="setMarginPreset(50)"
+              style="flex: 1; padding: 5px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;">50%</button>
+          </div>
+
+          <!-- Indicador de Ganancia Neta -->
+          <div id="profitIndicator"
+            style="margin-top: 15px; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #a0aec0;">Ganancia Estimada por Unidad:</span>
+            <strong id="profitAmount" style="color: #2ecc71; font-size: 16px;">+$0.00</strong>
+          </div>
+        </div>
+        <div class="form-group"
+          style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+          <label style="color: #00d2ff; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="prodIsWeighable" style="width: 20px; height: 20px; margin: 0;"
+              onchange="toggleWeighableLabels()">
+            ⚖️ Venta por Peso (Granel)
+          </label>
+          <small style="color: #a0aec0; font-size: 10px; display: block; margin-top: 5px;">
+            Active esto para productos que se venden por Kilogramos o Gramos (ej: verduras, embutidos).
+          </small>
         </div>
         <div class="form-group">
-          <label>Margen de Ganancia (%)</label>
-          <input type="number" step="0.01" id="prodMargin" oninput="calculateMarginOrPrice('margin')">
+          <label id="lblQuantity" style="font-weight: bold;">Stock Inicial (Unidades)</label>
+          <input type="number" step="0.001" id="prodQuantity" value="0" style="border-color: rgba(0, 210, 255, 0.3);">
+          <small id="weightNote" style="color: #2ecc71; font-size: 10px; display: none; margin-top: 4px;">El inventario
+            se rastrea en Kilogramos.</small>
         </div>
         <div class="form-group">
-          <label>Precio Venta ($)</label>
-          <input type="number" step="0.01" id="prodSalePrice" required oninput="calculateMarginOrPrice('price')">
-        </div>
-        <div class="form-group">
-          <label>Venta por Peso (Kg/Gr)</label>
-          <input type="checkbox" id="prodIsWeighable" style="width: auto; margin-top: 10px;">
-        </div>
-        <div class="form-group">
-          <label>Stock Inicial</label>
-          <input type="number" step="0.001" id="prodQuantity" value="0">
-        </div>
-        <div class="form-group">
-          <label>Stock Mínimo (Alerta)</label>
+          <label id="lblMinStock">Stock Mínimo (Alerta)</label>
           <input type="number" step="0.001" id="prodMinStock" value="5">
         </div>
         <div class="form-group full">
@@ -288,7 +372,7 @@
   <div id="kardexModal" class="modal">
     <div class="modal-content" style="width: 800px;">
       <div class="modal-header">
-        <h2>Historial de Movimientos (Kardex)</h2>
+        <h2>Historial de Movimientos</h2>
         <span class="close-modal" onclick="closeKardexModal()">&times;</span>
       </div>
       <div class="table-container">
@@ -311,6 +395,81 @@
   </div>
 
   <script>
+    // --- SELECTION MODE LOGIC ---
+    let selectionMode = false;
+    let selectedProducts = new Set();
+
+    function toggleSelectionMode() {
+      selectionMode = !selectionMode;
+      const container = document.querySelector('.container');
+      const btn = document.getElementById('btnToggleSelection');
+      const bulkBar = document.getElementById('bulkBar');
+
+      if (selectionMode) {
+        container.classList.add('selection-mode');
+        btn.innerText = 'Cancelar Selección';
+        btn.style.background = 'linear-gradient(90deg, #e74c3c 0%, #c0392b 100%)';
+        bulkBar.style.display = 'flex';
+      } else {
+        container.classList.remove('selection-mode');
+        btn.innerText = 'Seleccionar';
+        btn.style.background = 'linear-gradient(90deg, #34495e 0%, #2c3e50 100%)';
+        bulkBar.style.display = 'none';
+        selectedProducts.clear();
+        updateSelectedCount();
+        document.getElementById('selectAll').checked = false;
+      }
+      loadProducts();
+    }
+
+    function toggleSelectAll(master) {
+      const checkboxes = document.querySelectorAll('.prod-check');
+      checkboxes.forEach(cb => {
+        cb.checked = master.checked;
+        const id = parseInt(cb.getAttribute('data-id'));
+        if (master.checked) selectedProducts.add(id);
+        else selectedProducts.delete(id);
+      });
+      updateSelectedCount();
+    }
+
+    function handleRowCheck(cb, id) {
+      if (cb.checked) selectedProducts.add(id);
+      else {
+        selectedProducts.delete(id);
+        document.getElementById('selectAll').checked = false;
+      }
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selectedCount').innerText = selectedProducts.size;
+    }
+
+    async function bulkDeleteProducts() {
+      if (selectedProducts.size === 0) return;
+
+      if (confirm(`¿Estás seguro de eliminar los ${selectedProducts.size} productos seleccionados? Esta acción no se puede deshacer.`)) {
+        const ids = Array.from(selectedProducts);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const id of ids) {
+          try {
+            const response = await window.api.apiCall('products', 'deleteProduct', id);
+            if (response.success) successCount++;
+            else failCount++;
+          } catch (e) { failCount++; }
+        }
+
+        alert(`Proceso completado.\nÉxito: ${successCount}\nFallidos: ${failCount}`);
+        selectedProducts.clear();
+        updateSelectedCount();
+        if (selectionMode) toggleSelectionMode();
+        else loadProducts();
+      }
+    }
+
     let currentBcvRate = 1.00;
 
     // Obtener tasa BCV al iniciar
@@ -325,11 +484,13 @@
       }
     }
 
-    // Cálculos de Margen
+    // Cálculos de Margen Profesionales
     function calculateMarginOrPrice(source = 'buyPrice') {
       const buyPrice = parseFloat(document.getElementById('prodBuyPrice').value) || 0;
       const marginInput = document.getElementById('prodMargin');
       const salePriceInput = document.getElementById('prodSalePrice');
+      const profitAmount = document.getElementById('profitAmount');
+      const profitIndicator = document.getElementById('profitIndicator');
 
       if (source === 'margin') {
         const margin = parseFloat(marginInput.value) || 0;
@@ -340,10 +501,36 @@
         if (buyPrice > 0) {
           const margin = ((salePrice - buyPrice) / buyPrice) * 100;
           marginInput.value = margin.toFixed(2);
+        } else if (salePrice > 0) {
+          marginInput.value = 100; // Si no hay costo pero hay precio, es 100% margen
         } else {
           marginInput.value = 0;
         }
       }
+
+      // Actualizar Indicadores de Ganancia
+      const finalPrice = parseFloat(salePriceInput.value) || 0;
+      const profit = finalPrice - buyPrice;
+      const margin = parseFloat(marginInput.value) || 0;
+
+      profitAmount.innerText = `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`;
+
+      // Color coding
+      if (margin < 5) {
+        profitAmount.style.color = '#e74c3c'; // Rojo
+        profitIndicator.style.borderLeft = '4px solid #e74c3c';
+      } else if (margin < 15) {
+        profitAmount.style.color = '#f1c40f'; // Amarillo
+        profitIndicator.style.borderLeft = '4px solid #f1c40f';
+      } else {
+        profitAmount.style.color = '#2ecc71'; // Verde
+        profitIndicator.style.borderLeft = '4px solid #2ecc71';
+      }
+    }
+
+    function setMarginPreset(value) {
+      document.getElementById('prodMargin').value = value;
+      calculateMarginOrPrice('margin');
     }
 
     // RBAC check
@@ -365,12 +552,15 @@
         const cats = response.data;
         const filterCat = document.getElementById('filterCategory');
         const prodCat = document.getElementById('prodCategory');
-        
+
+        // ✅ FIX: Limpiar selects antes de agregar opciones para evitar duplicados acumulados
+        // que bloqueaban el formulario en aperturas sucesivas del modal
+        filterCat.innerHTML = '<option value="">Todas las Categorías</option>';
+        prodCat.innerHTML = '<option value="">-- Seleccione --</option>';
+
         cats.forEach(c => {
-          const opt1 = new Option(c.name, c.id);
-          filterCat.add(opt1);
-          const opt2 = new Option(c.name, c.id);
-          prodCat.add(opt2);
+          filterCat.add(new Option(c.name, c.id));
+          prodCat.add(new Option(c.name, c.id));
         });
       }
     }
@@ -380,7 +570,7 @@
       const category = document.getElementById('filterCategory').value;
 
       const response = await window.api.apiCall('products', 'getAllProducts', { search, category });
-      
+
       if (response.success) {
         const products = response.data;
         const tbody = document.querySelector('#productsTable tbody');
@@ -389,12 +579,16 @@
         products.forEach(p => {
           const isLowStock = p.quantity <= p.min_stock;
           const row = document.createElement('tr');
-          
+          const isSelected = selectedProducts.has(p.id);
+
           const userStr = localStorage.getItem("currentUser");
           const user = userStr ? JSON.parse(userStr) : {};
           const userLevel = user.user_level || user.level;
 
           row.innerHTML = `
+            <td class="col-check" style="display: ${selectionMode ? 'table-cell' : 'none'}; text-align: center;">
+              <input type="checkbox" class="prod-check" data-id="${p.id}" ${isSelected ? 'checked' : ''} onchange="handleRowCheck(this, ${p.id})">
+            </td>
             <td>${p.sku || '---'}</td>
             <td>${p.name}</td>
             <td>${p.category_name || 'Sin categoría'}</td>
@@ -405,9 +599,9 @@
               </span>
             </td>
             <td>${parseFloat(p.min_stock)}</td>
-            <td>${p.is_weighable ? '⚖️ Sí' : 'No'}</td>
+            <td>${p.is_weighable ? 'Sí' : 'No'}</td>
             <td class="actions">
-              <button class="btn-action btn-kardex" onclick="openKardex(${p.id})">Kardex</button>
+              <button class="btn-action btn-kardex" onclick="openKardex(${p.id})">Historial</button>
               <button class="btn-action btn-edit" onclick="editProduct(${p.id})">Editar</button>
               ${userLevel == 1 ? `<button class="btn-action btn-delete" onclick="deleteProduct(${p.id})">Eliminar</button>` : ''}
             </td>
@@ -430,7 +624,7 @@
       const modal = document.getElementById('productModal');
       const form = document.getElementById('productForm');
       const title = document.getElementById('modalTitle');
-      
+
       form.reset();
       document.getElementById('productId').value = '';
 
@@ -439,8 +633,9 @@
         loadProductData(prodId);
       } else {
         title.innerText = 'Nuevo Producto';
+        toggleWeighableLabels(); // Reset labels to default
       }
-      
+
       modal.style.display = 'flex';
     }
 
@@ -459,13 +654,19 @@
         document.getElementById('prodMinStock').value = p.min_stock;
         document.getElementById('prodMediaId').value = p.media_id;
         document.getElementById('prodIsWeighable').checked = p.is_weighable === 1;
-        
+
+        toggleWeighableLabels(); // Adjust labels based on loaded product
         calculateMarginOrPrice('price'); // Recalcular el margen visualmente
       }
     }
 
     function closeProductModal() {
       document.getElementById('productModal').style.display = 'none';
+      document.getElementById('productForm').reset();
+    }
+
+    function closeKardexModal() {
+      document.getElementById('kardexModal').style.display = 'none';
     }
 
     document.getElementById('productForm').onsubmit = async (e) => {
@@ -503,7 +704,7 @@
         if (response.success) {
           loadProducts();
         } else {
-          alert("Error al eliminar");
+          alert(response.message || "Error al eliminar el producto.");
         }
       }
     }
@@ -534,9 +735,41 @@
       }
     }
 
-    function closeKardexModal() {
-      document.getElementById('kardexModal').style.display = 'none';
+    // closeKardexModal ya definida arriba
+
+    function toggleWeighableLabels() {
+      const isWeighable = document.getElementById('prodIsWeighable').checked;
+      const lblQuantity = document.getElementById('lblQuantity');
+      const lblMinStock = document.getElementById('lblMinStock');
+      const weightNote = document.getElementById('weightNote');
+
+      if (!lblQuantity || !lblMinStock) return;
+
+      if (isWeighable) {
+        lblQuantity.innerText = "Stock Inicial (Kilogramos)";
+        lblMinStock.innerText = "Stock Mínimo (Kilogramos)";
+        if (weightNote) weightNote.style.display = 'block';
+      } else {
+        lblQuantity.innerText = "Stock Inicial (Unidades)";
+        lblMinStock.innerText = "Stock Mínimo (Unidades)";
+        if (weightNote) weightNote.style.display = 'none';
+      }
     }
+
+    // ✅ FIX: Cerrar modales con Escape y click en el backdrop (overlay)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeProductModal();
+        closeKardexModal();
+      }
+    });
+
+    document.getElementById('productModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('productModal')) closeProductModal();
+    });
+    document.getElementById('kardexModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('kardexModal')) closeKardexModal();
+    });
 
     window.onload = async () => {
       await fetchBcvRate();
@@ -545,7 +778,7 @@
     };
   </script>
 </body>
+
 </html>
 
-(End of file - total 454 lines)
 </content>

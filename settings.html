@@ -1,64 +1,119 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Configuración de Sistema</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272110">
   <style>
-    body { padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+    body {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
     .settings-container {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
-      padding: 30px; 
+      padding: 30px;
       border-radius: 20px;
-      width: 100%; 
+      width: 100%;
       max-width: 600px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      width: 100%; max-width: 600px; margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
     }
-    .form-group input { font-size: 18px; font-weight: bold; color: #00d2ff; }
+
+    .form-group input {
+      font-size: 18px;
+      font-weight: bold;
+      color: #00d2ff;
+    }
   </style>
 </head>
+
 <body>
   <div class="header-bar">
-    <h1 style="color: #00d2ff; font-size: 24px; font-weight: 600;">⚙ Configuración Global</h1>
-    <button class="btn-nav" onclick="window.location.href='dashboard.html'">Volver al Dashboard</button>
+    <h1 style="color: #00d2ff; font-size: 24px; font-weight: 600;">Configuración Global</h1>
+    <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
   </div>
-  
+
   <div class="settings-container">
-    <h2 style="font-size: 16px; color: #a0aec0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+    <h2
+      style="font-size: 16px; color: #a0aec0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
       Gestión de Monedas y Tasas
     </h2>
     <div class="form-group">
       <label>Tasa de Cambio BCV (Equivalente en Bolívares por 1 USD)</label>
       <input type="number" id="bcvRate" step="0.01" placeholder="Ej: 45.30">
-      <small style="color: #cbd5e0; font-size: 11px; margin-top: 5px;">Este valor se reflejará instantáneamente en el módulo de ventas y catálogo de productos.</small>
+      <small style="color: #cbd5e0; font-size: 11px; margin-top: 5px;">Este valor se reflejará instantáneamente en el
+        módulo de ventas y catálogo de productos.</small>
     </div>
-    
-    <button class="btn btn-add" id="btnSave" onclick="saveSettings()" style="margin-top: 20px;">💾 Guardar Configuración</button>
+
+    <button class="btn btn-add" id="btnSave" onclick="saveSettings()">Guardar Configuración</button>
   </div>
 
   <div class="settings-container" style="margin-top: 20px;">
-    <h2 style="font-size: 16px; color: #a0aec0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+    <h2
+      style="font-size: 16px; color: #a0aec0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
       🖨️ Impresión de Etiquetas de Productos
     </h2>
     <div class="form-group">
-      <label>Buscar Producto</label>
-      <input type="text" id="searchProductInput" placeholder="Nombre, SKU o Código..." oninput="searchBarcodeProducts()" style="margin-bottom: 10px;">
-      
-      <label>Seleccionar Producto</label>
-      <select id="barcodeProductSelect" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.2); outline: none;">
-        <option value="">-- Escriba para buscar --</option>
-      </select>
+      <label>Buscar y Seleccionar Producto</label>
+      <input type="text" id="productSearchInput" list="productList" 
+        placeholder="Nombre, Código o Código de barras..."
+        oninput="searchBarcodeProducts()" autocomplete="off">
+      <datalist id="productList"></datalist>
+      <small style="color: #cbd5e0; font-size: 11px; margin-top: 5px;">
+        Seleccione un producto de la lista desplegable para imprimir su etiqueta.
+      </small>
     </div>
-    
-    <button class="btn btn-add" onclick="printBarcodeTicket()" style="margin-top: 20px; background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);">🖨️ Imprimir Etiqueta</button>
+
+    <button class="btn btn-add" onclick="printBarcodeTicket()">Imprimir Etiqueta</button>
+  </div>
+
+  <!-- Nueva sección de Licenciamiento -->
+  <div class="settings-container" style="margin-top: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+    <h2
+      style="font-size: 16px; color: #10b981; margin-bottom: 20px; border-bottom: 1px solid rgba(16,185,129,0.1); padding-bottom: 10px;">
+      🔑 Licenciamiento del Sistema
+    </h2>
+
+    <div class="form-group">
+      <label>ID de esta Computadora (Hardware ID)</label>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="licenseHwid" readonly
+          style="color: #10b981; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.2); flex: 1;">
+        <button class="btn-nav" onclick="copyHwid()" style="padding: 10px 15px; font-size: 12px; margin: 0;">Copiar</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Estado de Licencia Actual</label>
+      <div id="licenseStatus"
+        style="font-size: 14px; color: #cbd5e0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+        Cargando información...
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top: 20px;">
+      <label>Ingresar Nueva Llave de Activación</label>
+      <input type="text" id="newLicenseKey" placeholder="YYYYMMDD-FIRMA">
+    </div>
+
+    <button class="btn btn-add" style="background: #10b981; width: 100%;" onclick="updateLicense()">Actualizar Licencia</button>
   </div>
 
   <script>
@@ -91,7 +146,7 @@
     async function saveSettings() {
       const btn = document.getElementById('btnSave');
       const bcvRate = document.getElementById('bcvRate').value;
-      
+
       if (!bcvRate || parseFloat(bcvRate) <= 0) {
         alert("Por favor ingrese una tasa válida mayor a 0.");
         return;
@@ -99,7 +154,7 @@
 
       btn.disabled = true;
       btn.innerText = 'Guardando...';
-      
+
       try {
         const response = await window.api.apiCall('settings', 'updateSetting', { key: 'bcv_rate', value: bcvRate });
         if (response && response.success) {
@@ -111,7 +166,7 @@
         alert("Error de conexión al guardar.");
       } finally {
         btn.disabled = false;
-        btn.innerText = '💾 Guardar Configuración';
+        btn.innerText = 'Guardar Configuración';
       }
     }
 
@@ -119,22 +174,35 @@
     let allProductsCache = [];
 
     async function searchBarcodeProducts() {
-      const search = document.getElementById('searchProductInput').value;
-      if (search.length < 2 && search.length > 0) return; // Esperar al menos 2 caracteres
+      const search = document.getElementById('productSearchInput').value;
+
+      // Si el valor ya coincide con un producto cargado, es una selección, no busquemos de nuevo
+      const isAlreadySelected = allProductsCache.some(p => {
+        const codeInfo = p.barcode || p.sku || `ID:${p.id}`;
+        return `${p.name} [${codeInfo}]` === search;
+      });
+      if (isAlreadySelected) return;
+
+      if (search.length < 2) {
+        if (search.length === 0) {
+          document.getElementById('productList').innerHTML = '';
+          allProductsCache = [];
+        }
+        return;
+      }
 
       try {
         const response = await window.api.apiCall('products', 'getAllProducts', { search });
         if (response.success) {
           allProductsCache = response.data;
-          const select = document.getElementById('barcodeProductSelect');
-          select.innerHTML = '<option value="">-- Seleccione un producto --</option>';
-          
+          const datalist = document.getElementById('productList');
+          datalist.innerHTML = '';
+
           allProductsCache.forEach(p => {
             const codeInfo = p.barcode || p.sku || `ID:${p.id}`;
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.text = `[${codeInfo}] ${p.name} - $${p.sale_price}`;
-            select.appendChild(opt);
+            const option = document.createElement('option');
+            option.value = `${p.name} [${codeInfo}]`;
+            datalist.appendChild(option);
           });
         }
       } catch (error) {
@@ -143,14 +211,41 @@
     }
 
     async function printBarcodeTicket() {
-      const productId = document.getElementById('barcodeProductSelect').value;
-      if (!productId) {
+      const searchValue = document.getElementById('productSearchInput').value.trim();
+      if (!searchValue) {
         alert("⚠️ Por favor, busque y seleccione un producto primero.");
         return;
       }
 
-      const product = allProductsCache.find(p => p.id == productId);
-      if (!product) return;
+      // 1. Intentar encontrar el producto en el cache local primero
+      let product = allProductsCache.find(p => {
+        const codeInfo = p.barcode || p.sku || `ID:${p.id}`;
+        return `${p.name} [${codeInfo}]` === searchValue;
+      });
+
+      // 2. FALLBACK: Si no está en cache (ej. se limpió), buscarlo directamente por el código entre corchetes
+      if (!product) {
+        const match = searchValue.match(/\[(.*?)\]$/);
+        const searchCode = match ? match[1] : searchValue;
+
+        try {
+          const response = await window.api.apiCall('products', 'getAllProducts', { search: searchCode });
+          if (response.success && response.data.length > 0) {
+            // Intentar match exacto con el formato de la lista
+            product = response.data.find(p => {
+              const codeInfo = p.barcode || p.sku || `ID:${p.id}`;
+              return `${p.name} [${codeInfo}]` === searchValue;
+            }) || response.data[0]; // O el primer resultado como fallback final
+          }
+        } catch (e) {
+          console.error("Error en búsqueda de respaldo:", e);
+        }
+      }
+
+      if (!product) {
+        alert("⚠️ Por favor, seleccione un producto válido de la lista desplegable.");
+        return;
+      }
 
       const bcvRate = document.getElementById('bcvRate').value || 1;
 
@@ -165,7 +260,72 @@
       });
     }
 
-    window.onload = loadSettings;
+    // 5. Lógica de Licenciamiento
+    async function loadLicenseInfo() {
+      try {
+        const hwid = await window.api.getMachineId();
+        document.getElementById('licenseHwid').value = hwid;
+
+        const status = await window.api.getLicenseStatus();
+        const statusDiv = document.getElementById('licenseStatus');
+
+        if (status.activated) {
+          const expiry = new Date(status.expiry);
+          statusDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Estado: <b style="color: #10b981;">ACTIVO</b></span>
+              <span>Vence: <b>${expiry.toLocaleDateString()}</b></span>
+            </div>
+          `;
+          statusDiv.style.borderLeft = "4px solid #10b981";
+        } else {
+          statusDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Estado: <b style="color: #f87171;">SIN LICENCIA</b></span>
+              <span style="font-size: 11px;">El programa podría bloquearse pronto.</span>
+            </div>
+          `;
+          statusDiv.style.borderLeft = "4px solid #f87171";
+        }
+      } catch (e) {
+        console.error("Error cargando info de licencia:", e);
+      }
+    }
+
+    function copyHwid() {
+      const hwid = document.getElementById('licenseHwid').value;
+      navigator.clipboard.writeText(hwid);
+      alert("✅ ID de Hardware copiado al portapapeles.");
+    }
+
+    async function updateLicense() {
+      const key = document.getElementById('newLicenseKey').value.trim();
+      if (!key) {
+        alert("⚠️ Por favor ingresa una llave de activación.");
+        return;
+      }
+
+      const confirmAct = confirm("¿Deseas aplicar esta nueva licencia?");
+      if (!confirmAct) return;
+
+      try {
+        const result = await window.api.activateLicense(key);
+        if (result.success) {
+          alert("¡Excelente! La licencia se ha actualizado correctamente.");
+          location.reload();
+        } else {
+          alert("❌ Error de Activación: " + result.message);
+        }
+      } catch (e) {
+        alert("Ocurrió un error al intentar activar la licencia.");
+      }
+    }
+
+    window.onload = () => {
+      loadSettings();
+      loadLicenseInfo();
+    };
   </script>
 </body>
+
 </html>

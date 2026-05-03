@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Categorías - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css?v=3">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272106">
   <style>
     body {
       flex-direction: column;
@@ -12,6 +13,7 @@
       overflow-y: auto;
       height: auto;
     }
+
     .container {
       width: 100%;
       max-width: 1000px;
@@ -25,19 +27,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
     }
+
     .header h1 {
       color: #00d2ff;
       font-size: 24px;
     }
-    .actions { display: flex; gap: 10px; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
     .toolbar {
       display: flex;
       justify-content: flex-end;
@@ -48,60 +57,76 @@
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1a2a3a;
       padding: 30px;
       border-radius: 20px;
       width: 400px;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: modalFadeIn 0.3s ease-out;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+
+    .modal-header h2 {
+      color: #00d2ff;
+      font-size: 20px;
+    }
+
     .close-modal {
       font-size: 24px;
       cursor: pointer;
       color: #a0aec0;
     }
+
     .modal-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: end;
     }
+
     .modal-form .form-group {
       display: flex;
       flex-direction: column;
     }
+
     .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
       margin-bottom: 8px;
       text-align: left;
     }
-    .modal-form input, .modal-form select {
+
+    .modal-form input,
+    .modal-form select {
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
       color: #fff;
       outline: none;
       width: 100%;
       box-sizing: border-box;
     }
+
     .modal-footer {
       margin-top: 30px;
       display: flex;
@@ -111,41 +136,57 @@
     }
 
 
-    .btn-save {
-      background: #2ecc71;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+
+
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Selection Mode Styles */
+    .selection-mode .col-check {
+      display: table-cell !important;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #00d2ff;
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <div class="header">
       <h1>Gestión de Categorías</h1>
       <div class="nav-buttons">
-        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button id="btnToggleSelection" class="btn-nav"
+          style="background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%);"
+          onclick="toggleSelectionMode()">Seleccionar</button>
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
         <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
         <button class="btn-nav" onclick="window.location.href='users.html'">Usuarios</button>
         <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
@@ -156,10 +197,24 @@
       <button class="btn-add" onclick="openCategoryModal()">+ Nueva Categoría</button>
     </div>
 
+    <!-- Barra de Acciones en Masa -->
+    <div id="bulkBar"
+      style="display: none; background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.3); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease-out;">
+      <div style="font-weight: 600; color: #fff;">
+        <span id="selectedCount">0</span> categorías seleccionadas
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-action btn-delete" style="padding: 10px 20px; font-size: 14px;"
+          onclick="bulkDeleteCategories()">Eliminar Seleccionadas</button>
+      </div>
+    </div>
+
     <div class="table-container">
       <table id="catTable">
         <thead>
           <tr>
+            <th class="col-check" style="display: none; width: 40px; text-align: center;"><input type="checkbox"
+                id="selectAll" onclick="toggleSelectAll(this)"></th>
             <th>Nombre</th>
             <th>Categoría Padre</th>
             <th>Acciones</th>
@@ -201,6 +256,82 @@
   </div>
 
   <script>
+    // --- SELECTION MODE LOGIC ---
+    let selectionMode = false;
+    let selectedCategories = new Set();
+
+    function toggleSelectionMode() {
+      selectionMode = !selectionMode;
+      const container = document.querySelector('.container');
+      const btn = document.getElementById('btnToggleSelection');
+      const bulkBar = document.getElementById('bulkBar');
+      const colChecks = document.querySelectorAll('.col-check');
+
+      if (selectionMode) {
+        container.classList.add('selection-mode');
+        btn.innerText = 'Cancelar Selección';
+        btn.style.background = 'linear-gradient(90deg, #e74c3c 0%, #c0392b 100%)';
+        bulkBar.style.display = 'flex';
+      } else {
+        container.classList.remove('selection-mode');
+        btn.innerText = 'Seleccionar';
+        btn.style.background = 'linear-gradient(90deg, #34495e 0%, #2c3e50 100%)';
+        bulkBar.style.display = 'none';
+        selectedCategories.clear();
+        updateSelectedCount();
+        document.getElementById('selectAll').checked = false;
+      }
+      loadCategories();
+    }
+
+    function toggleSelectAll(master) {
+      const checkboxes = document.querySelectorAll('.cat-check');
+      checkboxes.forEach(cb => {
+        cb.checked = master.checked;
+        const id = parseInt(cb.getAttribute('data-id'));
+        if (master.checked) selectedCategories.add(id);
+        else selectedCategories.delete(id);
+      });
+      updateSelectedCount();
+    }
+
+    function handleRowCheck(cb, id) {
+      if (cb.checked) selectedCategories.add(id);
+      else {
+        selectedCategories.delete(id);
+        document.getElementById('selectAll').checked = false;
+      }
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selectedCount').innerText = selectedCategories.size;
+    }
+
+    async function bulkDeleteCategories() {
+      if (selectedCategories.size === 0) return;
+
+      if (confirm(`¿Estás seguro de eliminar las ${selectedCategories.size} categorías seleccionadas? Si tienen productos asociados, la eliminación de esas categorías fallará.`)) {
+        const ids = Array.from(selectedCategories);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const id of ids) {
+          try {
+            const response = await window.api.apiCall('categories', 'deleteCategory', id);
+            if (response.success) successCount++;
+            else failCount++;
+          } catch (e) { failCount++; }
+        }
+
+        alert(`Proceso completado.\nÉxito: ${successCount}\nFallidos (pueden tener productos): ${failCount}`);
+        selectedCategories.clear();
+        updateSelectedCount();
+        if (selectionMode) toggleSelectionMode();
+        else loadCategories();
+      }
+    }
+
     // RBAC check
     const userStr = localStorage.getItem("currentUser");
     if (!userStr) {
@@ -223,12 +354,16 @@
 
         cats.forEach(c => {
           const row = document.createElement('tr');
-          
+          const isSelected = selectedCategories.has(c.id);
+
           const userStr = localStorage.getItem("currentUser");
           const user = userStr ? JSON.parse(userStr) : {};
           const userLevel = user.user_level || user.level;
 
           row.innerHTML = `
+            <td class="col-check" style="display: ${selectionMode ? 'table-cell' : 'none'}; text-align: center;">
+              <input type="checkbox" class="cat-check" data-id="${c.id}" ${isSelected ? 'checked' : ''} onchange="handleRowCheck(this, ${c.id})">
+            </td>
             <td>${c.name}</td>
             <td>${c.parent_name || '<span style="color: #a0aec0">Raíz</span>'}</td>
             <td class="actions">
@@ -247,7 +382,7 @@
         const cats = response.data;
         const select = document.getElementById('catParent');
         select.innerHTML = '<option value="">Ninguna (Categoría Raíz)</option>';
-        
+
         cats.forEach(c => {
           const opt = new Option(c.name, c.id);
           select.add(opt);
@@ -268,7 +403,7 @@
       const modal = document.getElementById('catModal');
       const form = document.getElementById('catForm');
       const title = document.getElementById('modalTitle');
-      
+
       form.reset();
       document.getElementById('catId').value = '';
 
@@ -278,7 +413,7 @@
       } else {
         title.innerText = 'Nueva Categoría';
       }
-      
+
       modal.style.display = 'flex';
     }
 
@@ -294,6 +429,7 @@
 
     function closeCategoryModal() {
       document.getElementById('catModal').style.display = 'none';
+      document.getElementById('catForm').reset();
     }
 
     document.getElementById('catForm').onsubmit = async (e) => {
@@ -333,13 +469,21 @@
       openCategoryModal(id);
     }
 
+    // ✅ FIX: Escape y click en backdrop para cerrar modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCategoryModal();
+    });
+    document.getElementById('catModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('catModal')) closeCategoryModal();
+    });
+
     window.onload = async () => {
       await updateParentSelect();
       await loadCategories();
     };
   </script>
 </body>
+
 </html>
 
-(End of file - total 315 lines)
 </content>

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Proveedores - Inventario</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=glass_1777557272110">
   <style>
     body {
       flex-direction: column;
@@ -12,6 +13,7 @@
       overflow-y: auto;
       height: auto;
     }
+
     .container {
       width: 100%;
       max-width: 1200px;
@@ -25,20 +27,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: fadeIn 0.8s ease-out;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
     }
+
     .header h1 {
       color: #00d2ff;
       font-size: 24px;
     }
-    .nav-buttons { display: flex; gap: 10px; }
-.btn-nav { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s ease; } .btn-nav:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
     .search-box input {
       flex: 1;
       padding: 10px 15px;
@@ -48,116 +56,152 @@
       color: #fff;
       outline: none;
     }
+
     .search-box input:focus {
       border-color: #00d2ff;
     }
-    .btn-add {
-      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    .btn-add:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
-    }
+
+
     .table-container {
       overflow-x: auto;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       color: #fff;
       font-size: 14px;
     }
+
     th {
       text-align: left;
       padding: 15px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       color: #00d2ff;
-      border-bottom: 2px solid rgba(255,255,255,0.1);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     }
+
     td {
       padding: 12px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     tr:hover {
-      background: rgba(255,255,255,0.03);
+      background: rgba(255, 255, 255, 0.03);
     }
-    .actions { display: flex; gap: 10px; }
-.btn-action { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 11px; transition: all 0.2s; } .btn-edit:hover { background: #3498db; border-color: #3498db; } .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; } .btn-status:hover { background: #f39c12; border-color: #f39c12; }
-    .btn-action {-radius: 0; margin-left: -1px;}
-    
-    
-    .btn-edit:hover { background: #3498db; border-color: #3498db; }
-    .btn-delete:hover { background: #e74c3c; border-color: #e74c3c; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-history { background: #ecc94b; color: #1a202c; }
+    .btn-history:hover { background: #d69e2e; }
+
+    /* Historial Table */
+    .history-table {
+      width: 100%;
+      margin-top: 10px;
+      font-size: 12px;
+      border-collapse: collapse;
+    }
+    .history-table th { font-size: 11px; padding: 8px; background: rgba(255,255,255,0.05); }
+    .history-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; }
+
+    /* Modal wide for history */
+    .modal-content.wide {
+      width: 800px;
+      max-width: 95%;
+    }
+
+    /* Modals */
+
+
+
+
+
+
 
     /* Modals */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1a2a3a;
       padding: 30px;
       border-radius: 20px;
       width: 500px;
       max-width: 90%;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: modalFadeIn 0.3s ease-out;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-    .modal-header h2 { color: #00d2ff; font-size: 20px; }
+
+    .modal-header h2 {
+      color: #00d2ff;
+      font-size: 20px;
+    }
+
     .close-modal {
       font-size: 24px;
       cursor: pointer;
       color: #a0aec0;
     }
+
     .modal-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: end;
     }
+
     .modal-form .form-group {
       display: flex;
       flex-direction: column;
     }
+
     .modal-form .form-group.full {
       grid-column: span 2;
     }
+
     .modal-form label {
       font-size: 12px;
       color: #cbd5e0;
       margin-bottom: 8px;
       text-align: left;
     }
-    .modal-form input, .modal-form select {
+
+    .modal-form input,
+    .modal-form select {
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
       color: #fff;
       outline: none;
       width: 100%;
       box-sizing: border-box;
     }
+
     .modal-footer {
       margin-top: 30px;
       display: flex;
@@ -166,41 +210,42 @@
       grid-column: span 2;
     }
 
-    .btn-save {
-      background: #2ecc71;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+
+
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <div class="header">
       <h1>Gestión de Proveedores</h1>
       <div class="nav-buttons">
-        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn-nav" onclick="window.location.href='dashboard.html'">Atrás</button>
         <button class="btn-nav" onclick="window.location.href='productos.html'">Productos</button>
         <button class="btn-nav" onclick="window.location.href='ventas.html'">Ventas</button>
       </div>
@@ -219,7 +264,8 @@
           <tr>
             <th>Nombre Empresa</th>
             <th>Contacto</th>
-            <th>Correo</th>
+            <th>Deuda ($)</th>
+            <th>Cedula</th>
             <th>Teléfono</th>
             <th>Acciones</th>
           </tr>
@@ -249,8 +295,8 @@
           <input type="text" id="suppContact">
         </div>
         <div class="form-group">
-          <label>Correo Electrónico</label>
-          <input type="email" id="suppEmail">
+          <label>Cedula</label>
+          <input type="text" id="suppCedula">
         </div>
         <div class="form-group">
           <label>Teléfono</label>
@@ -265,6 +311,92 @@
           <button type="submit" class="btn-save">Guardar Proveedor</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal Pago / Abono -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="paymentTitle">Registrar Pago a Proveedor</h2>
+        <span class="close-modal" onclick="closePaymentModal()">&times;</span>
+      </div>
+      <form id="paymentForm" class="modal-form">
+        <input type="hidden" id="paySuppId">
+        <input type="hidden" id="payPurchaseId">
+        <div class="form-group full">
+          <label>Proveedor</label>
+          <input type="text" id="paySuppName" readonly>
+        </div>
+        <div class="form-group">
+          <label>Deuda Pendiente ($)</label>
+          <input type="text" id="payCurrentDebt" readonly>
+        </div>
+        <div class="form-group">
+          <label>Monto a Pagar ($)</label>
+          <input type="number" id="payAmount" step="0.01" required>
+        </div>
+        <div class="form-group full">
+          <label>Nota / Referencia</label>
+          <input type="text" id="payNote" placeholder="Ej: Pago factura #123">
+        </div>
+        <div class="modal-footer full">
+          <button type="button" class="btn-cancel" onclick="closePaymentModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Confirmar Pago</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Historial -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content wide">
+      <div class="modal-header">
+        <h2 id="historyTitle">Historial de Compras</h2>
+        <span class="close-modal" onclick="closeHistoryModal()">&times;</span>
+      </div>
+
+      <div class="history-tabs" style="display:flex; gap:10px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+        <button id="tabPurchasesBtn" class="tab-btn active" onclick="switchHistoryTab('purchases')">Compras Pendientes</button>
+        <button id="tabPaymentsBtn" class="tab-btn" onclick="switchHistoryTab('payments')">Historial de Pagos</button>
+      </div>
+      
+      <div id="historyPurchases" class="tab-content">
+        <div class="table-container" style="max-height: 400px;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>ID Compra</th>
+                <th>Fecha</th>
+                <th>Productos</th>
+                <th>Total ($)</th>
+                <th>Saldo ($)</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="historyPurchasesBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="historyPayments" class="tab-content" style="display:none;">
+        <div class="table-container" style="max-height: 400px;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Monto ($)</th>
+                <th>Nota</th>
+              </tr>
+            </thead>
+            <tbody id="historyPaymentsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeHistoryModal()">Cerrar</button>
+      </div>
     </div>
   </div>
 
@@ -285,7 +417,7 @@
     async function loadSuppliers() {
       const search = document.getElementById('searchSupplier').value;
       const response = await window.api.apiCall('suppliers', 'getAllSuppliers', { search });
-      
+
       if (response.success) {
         const suppliers = response.data;
         const tbody = document.querySelector('#suppliersTable tbody');
@@ -293,7 +425,7 @@
 
         suppliers.forEach(s => {
           const row = document.createElement('tr');
-          
+
           const userStr = localStorage.getItem("currentUser");
           const user = userStr ? JSON.parse(userStr) : {};
           const userLevel = user.user_level || user.level;
@@ -301,9 +433,11 @@
           row.innerHTML = `
             <td>${s.name}</td>
             <td>${s.contact_name || 'N/A'}</td>
-            <td>${s.email || 'N/A'}</td>
+            <td style="color: ${parseFloat(s.debt) > 0 ? '#f6ad55' : '#48bb78'}">$${parseFloat(s.debt || 0).toFixed(2)}</td>
+            <td>${s.cedula || 'N/A'}</td>
             <td>${s.phone || 'N/A'}</td>
             <td class="actions">
+              <button class="btn-action btn-history" onclick="openHistory(${s.id}, '${s.name}')">Historial</button>
               <button class="btn-action btn-edit" onclick="editSupplier(${s.id})">Editar</button>
               ${userLevel == 1 ? '<button class="btn-action btn-delete" onclick="deleteSupplier(' + s.id + ')">Eliminar</button>' : ''}
             </td>
@@ -326,7 +460,7 @@
       const modal = document.getElementById('supplierModal');
       const form = document.getElementById('supplierForm');
       const title = document.getElementById('modalTitle');
-      
+
       form.reset();
       document.getElementById('supplierId').value = '';
 
@@ -336,7 +470,7 @@
       } else {
         title.innerText = 'Nuevo Proveedor';
       }
-      
+
       modal.style.display = 'flex';
     }
 
@@ -347,7 +481,7 @@
         document.getElementById('supplierId').value = s.id;
         document.getElementById('suppName').value = s.name;
         document.getElementById('suppContact').value = s.contact_name || '';
-        document.getElementById('suppEmail').value = s.email || '';
+        document.getElementById('suppCedula').value = s.cedula || '';
         document.getElementById('suppPhone').value = s.phone || '';
         document.getElementById('suppAddress').value = s.address || '';
       }
@@ -355,6 +489,7 @@
 
     function closeSupplierModal() {
       document.getElementById('supplierModal').style.display = 'none';
+      document.getElementById('supplierForm').reset();
     }
 
     document.getElementById('supplierForm').onsubmit = async (e) => {
@@ -363,7 +498,7 @@
       const data = {
         name: document.getElementById('suppName').value,
         contact_name: document.getElementById('suppContact').value,
-        email: document.getElementById('suppEmail').value,
+        cedula: document.getElementById('suppCedula').value,
         phone: document.getElementById('suppPhone').value,
         address: document.getElementById('suppAddress').value
       };
@@ -397,10 +532,165 @@
       openSupplierModal(id);
     }
 
+    // ✅ GESTIÓN DE HISTORIAL
+    async function openHistory(id, name) {
+      document.getElementById('historyTitle').innerText = `Historial: ${name}`;
+      const response = await window.api.apiCall('suppliers', 'getPurchaseHistory', id);
+      
+      if (response.success) {
+        const historyBody = document.getElementById('historyBody');
+        historyBody.innerHTML = '';
+        
+        if (!response.data || response.data.length === 0) {
+          historyBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay compras registradas para este proveedor.</td></tr>';
+        } else {
+          response.data.forEach(p => {
+            const row = `
+              <tr>
+                <td>#${p.id}</td>
+                <td>${new Date(p.date).toLocaleString()}</td>
+                <td>${p.products}</td>
+                <td style="color: #00d2ff; font-weight: bold;">$${parseFloat(p.total).toFixed(2)}</td>
+              </tr>
+            `;
+            historyBody.innerHTML += row;
+          });
+        }
+        document.getElementById('historyModal').style.display = 'flex';
+      } else {
+        alert("Error al cargar historial: " + response.error);
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').style.display = 'none';
+    }
+
+    // ✅ GESTIÓN DE PAGOS Y ABONOS
+    function openPayment(id, name, debt, purchaseId = null) {
+      document.getElementById('paySuppId').value = id;
+      document.getElementById('payPurchaseId').value = purchaseId || '';
+      document.getElementById('paySuppName').value = name + (purchaseId ? ` (Compra #${purchaseId})` : '');
+      document.getElementById('payCurrentDebt').value = `$${parseFloat(debt).toFixed(2)}`;
+      document.getElementById('payAmount').value = '';
+      document.getElementById('payAmount').max = debt;
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    document.getElementById('paymentForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('paySuppId').value;
+      const purchaseId = document.getElementById('payPurchaseId').value;
+      const amount = parseFloat(document.getElementById('payAmount').value);
+      const note = document.getElementById('payNote').value;
+
+      const response = await window.api.apiCall('suppliers', 'addPayment', parseInt(id), amount, note, purchaseId ? parseInt(purchaseId) : null);
+      if (response.success) {
+        alert("Pago registrado con éxito");
+        closePaymentModal();
+        loadSuppliers();
+        if (document.getElementById('historyModal').style.display === 'flex') {
+           // Recargar historial si está abierto
+           openHistory(parseInt(id), document.getElementById('paySuppName').value.split(' (')[0]);
+        }
+      } else {
+        alert("Error: " + (response.error || response.message));
+      }
+    };
+
+    // ✅ GESTIÓN DE HISTORIAL
+    async function openHistory(id, name) {
+      document.getElementById('historyTitle').innerText = `Historial: ${name}`;
+      const response = await window.api.apiCall('suppliers', 'getPurchaseHistory', id);
+      
+      if (response.success) {
+        renderHistoryPurchases(response.sales, name);
+        renderHistoryPayments(response.payments);
+        switchHistoryTab('purchases');
+        document.getElementById('historyModal').style.display = 'flex';
+      } else {
+        alert("Error al cargar historial: " + response.error);
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').style.display = 'none';
+    }
+
+    function switchHistoryTab(tab) {
+      document.getElementById('historyPurchases').style.display = tab === 'purchases' ? 'block' : 'none';
+      document.getElementById('historyPayments').style.display = tab === 'payments' ? 'block' : 'none';
+      
+      document.getElementById('tabPurchasesBtn').classList.toggle('active', tab === 'purchases');
+      document.getElementById('tabPaymentsBtn').classList.toggle('active', tab === 'payments');
+    }
+
+    function renderHistoryPurchases(purchases, supplierName) {
+      const tbody = document.getElementById('historyPurchasesBody');
+      tbody.innerHTML = '';
+      if (!purchases || purchases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay compras registradas.</td></tr>';
+        return;
+      }
+      purchases.forEach(p => {
+        const row = `<tr>
+          <td>#${p.id}</td>
+          <td>${new Date(p.date).toLocaleString()}</td>
+          <td>${p.products}</td>
+          <td>$${parseFloat(p.total).toFixed(2)}</td>
+          <td style="color: #f6ad55; font-weight: bold;">$${parseFloat(p.pending_amount || 0).toFixed(2)}</td>
+          <td>
+            ${parseFloat(p.pending_amount) > 0 ? `<button class="btn-action btn-pay" onclick="openPayment(${p.supplier_id || 'null'}, '${supplierName}', ${p.pending_amount}, ${p.id})">Abonar</button>` : '<span class="status-badge status-paid">Pagado</span>'}
+          </td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function renderHistoryPayments(payments) {
+      const tbody = document.getElementById('historyPaymentsBody');
+      tbody.innerHTML = '';
+      if (!payments || payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No se han registrado pagos.</td></tr>';
+        return;
+      }
+      payments.forEach(p => {
+        const row = `<tr>
+          <td>${new Date(p.date).toLocaleString()}</td>
+          <td style="color: #48bb78; font-weight: bold;">$${parseFloat(p.amount).toFixed(2)}</td>
+          <td>${p.note || '---'}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    // ✅ FIX: Escape y click en backdrop para cerrar modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSupplierModal();
+        closeHistoryModal();
+        closePaymentModal();
+      }
+    });
+
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', (e) => {
+        if (e.target === m) {
+          closeSupplierModal();
+          closeHistoryModal();
+          closePaymentModal();
+        }
+      });
+    });
+
     window.onload = loadSuppliers;
   </script>
 </body>
+
 </html>
 
-(End of file - total 308 lines)
 </content>
